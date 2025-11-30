@@ -90,6 +90,88 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.1</version>
+
+                <dependencies>
+                    <!-- Use Google Java Style -->
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>10.12.4</version>
+                    </dependency>
+                </dependencies>
+
+                <executions>
+                    <!-- Run checkstyle during mvn validate -->
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <!-- Fail the build if there are violations -->
+                    <failOnViolation>true</failOnViolation>
+
+                    <!-- Use built-in Google style -->
+                    <configLocation>google_checks.xml</configLocation>
+
+                    <!-- Includes Java source only -->
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+
+                    <!-- Display violations clearly -->
+                    <consoleOutput>true</consoleOutput>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+
+                <configuration>
+                    <java>
+                        <!-- Use Google Java Format -->
+                        <googleJavaFormat>
+                            <version>1.17.0</version>
+                        </googleJavaFormat>
+
+                        <!-- Include main and test sources -->
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+
+                        <!-- Optional: remove unused imports -->
+                        <removeUnusedImports />
+                    </java>
+                </configuration>
+
+                <executions>
+                    <!-- Check formatting during package -->
+                    <execution>
+                        <id>spotless-check</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- Optional: run manually to apply formatting -->
+                    <execution>
+                        <id>spotless-apply</id>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>

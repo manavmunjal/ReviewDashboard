@@ -1,16 +1,15 @@
 package com.reviewdashboard.service;
 
 import com.reviewdashboard.client.ReviewClient;
-import com.reviewdashboard.model.ReviewDTO;
+import com.reviewdashboard.model.ReviewDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 /**
  * Service layer for handling product review-related business logic.
- * <p>
- * This service acts as an intermediary between the controller and the
- * {@link ReviewClient}, delegating calls to the external product/review microservice.
- * </p>
+ *
+ * <p>This service acts as an intermediary between the controller and the {@link ReviewClient},
+ * delegating calls to the external product/review microservice.
  */
 @Service
 public class ReviewService {
@@ -29,10 +28,10 @@ public class ReviewService {
    * Submits a new review for a specific product by delegating the call to the ReviewClient.
    *
    * @param productId The unique identifier of the product.
-   * @param review    The {@link ReviewDTO} object containing the review details.
-   * @return The created {@link ReviewDTO} as confirmed by the external service.
+   * @param review The {@link ReviewDto} object containing the review details.
+   * @return The created {@link ReviewDto} as confirmed by the external service.
    */
-  public ReviewDTO addReview(String productId, ReviewDTO review) {
+  public ReviewDto addReview(String productId, ReviewDto review) {
     return reviewClient.postReview(productId, review);
   }
 

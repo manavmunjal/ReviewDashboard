@@ -2,31 +2,26 @@ package com.reviewdashboard.model;
 
 /**
  * Data Transfer Object for representing a review.
- * <p>
- * This class is used to transfer review data between different layers of the application,
- * such as between the controller and service layers, or between microservices.
- * </p>
+ *
+ * <p>This class is used to transfer review data between different layers of the application, such
+ * as between the controller and service layers, or between microservices.
  */
-public class ReviewDTO {
-  /**
-   * The unique identifier of the review.
-   */
+public class ReviewDto {
+  /** The unique identifier of the review. */
   private String id;
-  /**
-   * The textual content of the review.
-   */
+
+  /** The textual content of the review. */
   private String comment;
-  /**
-   * The numerical rating given in the review (e.g., 1 to 5).
-   */
+
+  /** The numerical rating given in the review (e.g., 1 to 5). */
   private double rating;
-  /**
-   * The user who submitted the review.
-   */
-  private UserDTO user;
+
+  /** The user who submitted the review. */
+  private UserDto user;
 
   /**
    * Gets the unique identifier of the review.
+   *
    * @return The review ID.
    */
   public String getId() {
@@ -35,6 +30,7 @@ public class ReviewDTO {
 
   /**
    * Sets the unique identifier of the review.
+   *
    * @param id The review ID.
    */
   public void setId(String id) {
@@ -43,6 +39,7 @@ public class ReviewDTO {
 
   /**
    * Gets the comment text of the review.
+   *
    * @return The review comment.
    */
   public String getComment() {
@@ -51,6 +48,7 @@ public class ReviewDTO {
 
   /**
    * Sets the comment text of the review.
+   *
    * @param comment The review comment.
    */
   public void setComment(String comment) {
@@ -59,6 +57,7 @@ public class ReviewDTO {
 
   /**
    * Gets the numerical rating of the review.
+   *
    * @return The rating.
    */
   public double getRating() {
@@ -67,6 +66,7 @@ public class ReviewDTO {
 
   /**
    * Sets the numerical rating of the review.
+   *
    * @param rating The rating.
    */
   public void setRating(double rating) {
@@ -75,17 +75,19 @@ public class ReviewDTO {
 
   /**
    * Gets the user who wrote the review.
+   *
    * @return The user DTO.
    */
-  public UserDTO getUser() {
+  public UserDto getUser() {
     return user;
   }
 
   /**
    * Sets the user who wrote the review.
+   *
    * @param user The user DTO.
    */
-  public void setUser(UserDTO user) {
+  public void setUser(UserDto user) {
     this.user = user;
   }
 }
