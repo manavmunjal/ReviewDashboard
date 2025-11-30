@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service;
 
 /**
  * Service layer for handling company-related business logic.
- * <p>
- * This service acts as an intermediary between the controller and the
- * {@link CompanyClient}, delegating calls to the external company microservice.
- * </p>
+ *
+ * <p>This service acts as an intermediary between the controller and the {@link CompanyClient},
+ * delegating calls to the external company microservice.
  */
 @Service
 public class CompanyService {
@@ -25,7 +24,8 @@ public class CompanyService {
   }
 
   /**
-   * Retrieves the average rating for a specific company by delegating the call to the CompanyClient.
+   * Retrieves the average rating for a specific company by delegating the call to the
+   * CompanyClient.
    *
    * @param companyId The unique identifier of the company.
    * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
@@ -33,5 +33,4 @@ public class CompanyService {
   public ResponseEntity<Double> getAverageRating(String companyId) {
     return companyClient.getAverageRating(companyId);
   }
-
 }
