@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.reviewdashboard.client.ReviewClient;
+import com.reviewdashboard.client.ProductClient;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.model.UserDto;
 import org.junit.jupiter.api.Test;
@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 public class ReviewServiceTest {
 
   // Mocks the ReviewClient to isolate the service for testing
-  @Mock private ReviewClient reviewClient;
+  @Mock private ProductClient productClient;
 
   // Injects the mocked ReviewClient into the ReviewService
   @InjectMocks private ReviewService reviewService;
@@ -38,7 +38,7 @@ public class ReviewServiceTest {
     review.setUser(user);
 
     // Mock the reviewClient to return the review when postReview is called
-    when(reviewClient.postReview(anyString(), any(ReviewDto.class))).thenReturn(review);
+    when(productClient.postReview(anyString(), any(ReviewDto.class))).thenReturn(review);
 
     // When: Call the method under test
     final ReviewDto result = reviewService.addReview(productId, review);
@@ -56,7 +56,7 @@ public class ReviewServiceTest {
     final ResponseEntity<Double> response = ResponseEntity.ok(expectedRating);
 
     // Mock the reviewClient to return the response entity
-    when(reviewClient.getAverageRating(anyString())).thenReturn(response);
+    when(productClient.getAverageRating(anyString())).thenReturn(response);
 
     // When: Call the method under test
     final ResponseEntity<Double> result = reviewService.getAverageRating(productId);
