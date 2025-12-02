@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 @FeignClient(
     name = "companyClient",
-    url = "https://sentiment-analyzer-service-321275563168.us-central1.run.app/api/company")
+    url = "${company.client.url}")
 public interface CompanyClient {
   /**
    * Retrieves the average rating for a specific company by its ID.

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 @FeignClient(
     name = "reviewClient",
-    url = "https://sentiment-analyzer-service-321275563168.us-central1.run.app/api/products")
+    url = "${company.client.url}")
 public interface ReviewClient {
 
   /**
