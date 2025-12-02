@@ -1,6 +1,6 @@
 package com.reviewdashboard.service;
 
-import com.reviewdashboard.client.ReviewClient;
+import com.reviewdashboard.client.ProductClient;
 import com.reviewdashboard.model.ReviewDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -8,20 +8,20 @@ import org.springframework.stereotype.Service;
 /**
  * Service layer for handling product review-related business logic.
  *
- * <p>This service acts as an intermediary between the controller and the {@link ReviewClient},
+ * <p>This service acts as an intermediary between the controller and the {@link ProductClient},
  * delegating calls to the external product/review microservice.
  */
 @Service
 public class ReviewService {
-  private final ReviewClient reviewClient;
+  private final ProductClient productClient;
 
   /**
    * Constructs a new ReviewService with the necessary Feign client.
    *
-   * @param reviewClient The Feign client for communicating with the product/review service.
+   * @param productClient The Feign client for communicating with the product/review service.
    */
-  public ReviewService(ReviewClient reviewClient) {
-    this.reviewClient = reviewClient;
+  public ReviewService(ProductClient productClient) {
+    this.productClient = productClient;
   }
 
   /**
@@ -32,7 +32,7 @@ public class ReviewService {
    * @return The created {@link ReviewDto} as confirmed by the external service.
    */
   public ReviewDto addReview(String productId, ReviewDto review) {
-    return reviewClient.postReview(productId, review);
+    return productClient.postReview(productId, review);
   }
 
   /**
@@ -42,6 +42,6 @@ public class ReviewService {
    * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
    */
   public ResponseEntity<Double> getAverageRating(String productId) {
-    return reviewClient.getAverageRating(productId);
+    return productClient.getAverageRating(productId);
   }
 }

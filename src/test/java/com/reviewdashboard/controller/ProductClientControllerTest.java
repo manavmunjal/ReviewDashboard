@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
  * <p>This test class verifies the functionality of the controller, ensuring that it correctly
  * delegates calls to its underlying services and returns the expected results.
  */
-public class ReviewClientControllerTest {
+public class ProductClientControllerTest {
 
   /** Mocked instance of the {@link ReviewService} to isolate the controller during tests. */
   private ReviewService reviewService;
