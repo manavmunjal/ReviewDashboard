@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
  * <p>This interface defines methods to make HTTP requests to the product and review-related
  * endpoints available at the specified URL.
  */
-@FeignClient(name = "reviewClient", url = "https://sentiment-analyzer-service-321275563168.us-central1.run.app/api/products")
+@FeignClient(
+    name = "reviewClient",
+    url = "https://sentiment-analyzer-service-321275563168.us-central1.run.app/api/products")
 public interface ReviewClient {
 
   /**
