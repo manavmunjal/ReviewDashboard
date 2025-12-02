@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<checkstyle version="10.12.4">
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/controller/ReviewClientController.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/model/ReviewDto.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/model/UserDto.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/service/ReviewService.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/service/CompanyService.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/ReviewDashBoardApplication.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/client/ReviewClient.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/java/com/reviewdashboard/client/CompanyClient.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/ReviewDashBoardApplicationTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/controller/ReviewClientControllerTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/model/ReviewDtoTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/model/UserDtoTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/service/ReviewServiceTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/test/java/com/reviewdashboard/service/CompanyServiceTest.java">
+</file>
+<file name="/Users/songli/ReviewDashboard/src/main/resources/application.properties">
+</file>
+</checkstyle>
