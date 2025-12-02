@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * <p>This interface defines methods to make HTTP requests to the company-related endpoints
  * available at the specified URL.
  */
-@FeignClient(
-    name = "companyClient",
-    url = "${company.client.url}")
+@FeignClient(name = "companyClient", url = "${company.client.url}")
 public interface CompanyClient {
   /**
    * Retrieves the average rating for a specific company by its ID.
