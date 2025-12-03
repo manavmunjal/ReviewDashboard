@@ -39,8 +39,8 @@ public class ReviewClientControllerTest {
   /**
    * Sets up the test environment before each test method.
    *
-   * <p>This method initializes the mock services using Mockito and injects them into a new
-   * instance of {@link ReviewClientController}.
+   * <p>This method initializes the mock services using Mockito and injects them into a new instance
+   * of {@link ReviewClientController}.
    */
   @BeforeEach
   public void setUp() {
@@ -54,12 +54,12 @@ public class ReviewClientControllerTest {
   // ============================================================
 
   /**
-   * Tests that {@link ReviewClientController#addReview(String, ReviewDto)} returns a 201
-   * CREATED response when the review is successfully added.
+   * Tests that {@link ReviewClientController#addReview(String, ReviewDto)} returns a 201 CREATED
+   * response when the review is successfully added.
    */
   @Test
   public void testAddReview_Success() {
-    String productId = "123";
+    final String productId = "123";
     ReviewDto review = new ReviewDto();
     review.setComment("Awesome!");
     review.setRating(5);
@@ -89,8 +89,8 @@ public class ReviewClientControllerTest {
   }
 
   /**
-   * Tests that {@link ReviewClientController#addReview(String, ReviewDto)} returns a 500
-   * INTERNAL SERVER ERROR when the service throws an unexpected exception.
+   * Tests that {@link ReviewClientController#addReview(String, ReviewDto)} returns a 500 INTERNAL
+   * SERVER ERROR when the service throws an unexpected exception.
    */
   @Test
   public void testAddReview_InternalError() {
@@ -108,13 +108,12 @@ public class ReviewClientControllerTest {
   // ============================================================
 
   /**
-   * Tests that {@link ReviewClientController#getProductAverageRating(String)} returns a 200 OK
-   * with the expected rating when reviews exist for the product.
+   * Tests that {@link ReviewClientController#getProductAverageRating(String)} returns a 200 OK with
+   * the expected rating when reviews exist for the product.
    */
   @Test
   public void testGetProductAverageRating_Success() {
-    when(reviewService.getAverageRating("123"))
-        .thenReturn(ResponseEntity.ok(4.5));
+    when(reviewService.getAverageRating("123")).thenReturn(ResponseEntity.ok(4.5));
 
     ResponseEntity<?> response = controller.getProductAverageRating("123");
 
@@ -123,13 +122,12 @@ public class ReviewClientControllerTest {
   }
 
   /**
-   * Tests that {@link ReviewClientController#getProductAverageRating(String)} returns a 404
-   * NOT FOUND when no reviews exist for the product.
+   * Tests that {@link ReviewClientController#getProductAverageRating(String)} returns a 404 NOT
+   * FOUND when no reviews exist for the product.
    */
   @Test
   public void testGetProductAverageRating_NotFound() {
-    when(reviewService.getAverageRating("123"))
-        .thenReturn(ResponseEntity.ok(null));
+    when(reviewService.getAverageRating("123")).thenReturn(ResponseEntity.ok(null));
 
     ResponseEntity<?> response = controller.getProductAverageRating("123");
 
@@ -158,8 +156,7 @@ public class ReviewClientControllerTest {
    */
   @Test
   public void testGetProductAverageRating_InternalError() {
-    when(reviewService.getAverageRating("123"))
-        .thenThrow(new RuntimeException("Timeout"));
+    when(reviewService.getAverageRating("123")).thenThrow(new RuntimeException("Timeout"));
 
     ResponseEntity<?> response = controller.getProductAverageRating("123");
 
@@ -172,13 +169,12 @@ public class ReviewClientControllerTest {
   // ============================================================
 
   /**
-   * Tests that {@link ReviewClientController#getCompanyAverageRating(String)} returns a 200 OK
-   * with the expected rating when reviews exist for the company.
+   * Tests that {@link ReviewClientController#getCompanyAverageRating(String)} returns a 200 OK with
+   * the expected rating when reviews exist for the company.
    */
   @Test
   public void testGetCompanyAverageRating_Success() {
-    when(companyService.getAverageRating("456"))
-        .thenReturn(ResponseEntity.ok(4.2));
+    when(companyService.getAverageRating("456")).thenReturn(ResponseEntity.ok(4.2));
 
     ResponseEntity<?> response = controller.getCompanyAverageRating("456");
 
@@ -187,13 +183,12 @@ public class ReviewClientControllerTest {
   }
 
   /**
-   * Tests that {@link ReviewClientController#getCompanyAverageRating(String)} returns a 404
-   * NOT FOUND when no reviews exist for the company.
+   * Tests that {@link ReviewClientController#getCompanyAverageRating(String)} returns a 404 NOT
+   * FOUND when no reviews exist for the company.
    */
   @Test
   public void testGetCompanyAverageRating_NotFound() {
-    when(companyService.getAverageRating("456"))
-        .thenReturn(ResponseEntity.ok(null));
+    when(companyService.getAverageRating("456")).thenReturn(ResponseEntity.ok(null));
 
     ResponseEntity<?> response = controller.getCompanyAverageRating("456");
 

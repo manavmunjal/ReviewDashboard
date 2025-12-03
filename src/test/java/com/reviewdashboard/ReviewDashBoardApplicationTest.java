@@ -11,15 +11,14 @@ import org.springframework.test.context.TestPropertySource;
  * without requiring actual external services.
  */
 @SpringBootTest
-@TestPropertySource(properties = {
-    "company.client.url=http://localhost:8081",
-    "product.client.url=http://localhost:8082"
-})
+@TestPropertySource(
+    properties = {
+      "company.client.url=http://localhost:8081",
+      "product.client.url=http://localhost:8082"
+    })
 class ReviewDashBoardApplicationTest {
 
-  /**
-   * Ensures that the Spring application context loads successfully with the test properties.
-   */
+  /** Ensures that the Spring application context loads successfully with the test properties. */
   @Test
   void contextLoads() {}
 }

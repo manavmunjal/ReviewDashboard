@@ -176,6 +176,30 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.18.0</version>
+                <executions>
+                    <execution>
+                        <id>pmd</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>pmd</goal>
+                            <goal>cpd-check</goal>
+                        </goals>
+                        <configuration>
+                            <rulesets>
+                                <ruleset>/rulesets/java/quickstart.xml</ruleset>
+                            </rulesets>
+                            <failOnViolation>false</failOnViolation>
+                            <excludes>
+                                com/reviewdashboard/ReviewDashBoardApplication.java
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
