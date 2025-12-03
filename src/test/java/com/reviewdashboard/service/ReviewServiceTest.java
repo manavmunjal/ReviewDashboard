@@ -48,6 +48,13 @@ public class ReviewServiceTest {
 
   private ReviewDto review;
 
+  /**
+   * Initializes common test data before each test method.
+   *
+   * <p>This method creates a sample {@link ReviewDto} with a comment, rating, and associated user.
+   * It ensures that each test has a fresh instance of the review object to avoid shared state
+   * between tests.
+   */
   @BeforeEach
   public void setUp() {
     review = new ReviewDto();
@@ -84,8 +91,7 @@ public class ReviewServiceTest {
     when(productClient.postReview(anyString(), any(ReviewDto.class)))
         .thenThrow(new IllegalArgumentException("Invalid product ID"));
 
-    assertThrows(
-        IllegalArgumentException.class, () -> reviewService.addReview("invalid", review));
+    assertThrows(IllegalArgumentException.class, () -> reviewService.addReview("invalid", review));
   }
 
   /**
@@ -159,8 +165,7 @@ public class ReviewServiceTest {
     when(productClient.getAverageRating(anyString()))
         .thenThrow(new IllegalArgumentException("Invalid product ID"));
 
-    assertThrows(
-        IllegalArgumentException.class, () -> reviewService.getAverageRating("invalid"));
+    assertThrows(IllegalArgumentException.class, () -> reviewService.getAverageRating("invalid"));
   }
 
   /**

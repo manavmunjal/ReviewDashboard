@@ -34,5 +34,5 @@ public interface ProductClient {
    * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
    */
   @GetMapping("/{productId}/average-rating")
-  ResponseEntity<Double> getAverageRating(@PathVariable final String productId);
+  ResponseEntity<Double> getAverageRating(@PathVariable String productId);
 }

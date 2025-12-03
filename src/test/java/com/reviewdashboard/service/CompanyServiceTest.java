@@ -16,7 +16,7 @@ import org.springframework.http.ResponseEntity;
 /**
  * Unit tests for the {@link CompanyService} class.
  *
- * This test class covers all equivalence partitions for {@link
+ * <p>This test class covers all equivalence partitions for {@link
  * CompanyService#getAverageRating(String)}:
  *
  * <ul>
@@ -30,25 +30,22 @@ import org.springframework.http.ResponseEntity;
 public class CompanyServiceTest {
 
   /** Mocks the {@link CompanyClient} to isolate the service during testing. */
-  @Mock
-  private CompanyClient companyClient;
+  @Mock private CompanyClient companyClient;
 
   /** Injects the mocked {@link CompanyClient} into the {@link CompanyService}. */
-  @InjectMocks
-  private CompanyService companyService;
+  @InjectMocks private CompanyService companyService;
 
   /**
    * Tests the scenario: valid company ID with ratings.
    *
-   * Expects a 200 OK response with the expected numeric rating.
+   * <p>Expects a 200 OK response with the expected numeric rating.
    */
   @Test
   public void testGetCompanyAverageRating_ValidWithRatings() {
     String companyId = "123";
     Double expectedRating = 4.5;
 
-    when(companyClient.getAverageRating(anyString()))
-        .thenReturn(ResponseEntity.ok(expectedRating));
+    when(companyClient.getAverageRating(anyString())).thenReturn(ResponseEntity.ok(expectedRating));
 
     ResponseEntity<Double> actual = companyService.getAverageRating(companyId);
 
@@ -58,7 +55,7 @@ public class CompanyServiceTest {
   /**
    * Tests the scenario: valid company ID with no ratings.
    *
-   * Expects a 200 OK response with a null body.
+   * <p>Expects a 200 OK response with a null body.
    */
   @Test
   public void testGetCompanyAverageRating_ValidWithNoRatings() {
@@ -74,7 +71,7 @@ public class CompanyServiceTest {
   /**
    * Tests the scenario: invalid company ID.
    *
-   * Expects an {@link IllegalArgumentException} to be thrown.
+   * <p>Expects an {@link IllegalArgumentException} to be thrown.
    */
   @Test
   public void testGetCompanyAverageRating_InvalidCompanyId() {
@@ -92,7 +89,7 @@ public class CompanyServiceTest {
   /**
    * Tests the scenario: unexpected error occurs in the client.
    *
-   * Expects a {@link RuntimeException} to be thrown.
+   * <p>Expects a {@link RuntimeException} to be thrown.
    */
   @Test
   public void testGetCompanyAverageRating_UnexpectedError() {

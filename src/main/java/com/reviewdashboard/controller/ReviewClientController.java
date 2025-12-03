@@ -7,7 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for handling product and company reviews.
@@ -36,17 +41,32 @@ public class ReviewClientController {
    * @return ResponseEntity with status and body.
    */
   @PostMapping("product/{productId}")
-  public ResponseEntity<?> addReview(@PathVariable String productId, @RequestBody ReviewDto review) {
-    logger.info("Received request to add review for productId={}", productId);
+  public ResponseEntity<?> addReview(
+      @PathVariable String productId, @RequestBody ReviewDto review) {
+
+    if (logger.isInfoEnabled()) {
+      logger.info("Received request to add review for productId={}", productId);
+    }
+
     try {
       ReviewDto createdReview = reviewService.addReview(productId, review);
-      logger.info("Successfully added review for productId={}", productId);
+
+      if (logger.isInfoEnabled()) {
+        logger.info("Successfully added review for productId={}", productId);
+      }
+
       return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
+
     } catch (IllegalArgumentException e) {
-      logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      if (logger.isWarnEnabled()) {
+        logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      }
       return ResponseEntity.badRequest().body(e.getMessage());
+
     } catch (Exception e) {
-      logger.error("Error adding review for productId={}", productId, e);
+      if (logger.isErrorEnabled()) {
+        logger.error("Error adding review for productId={}", productId, e);
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to create review: " + e.getMessage());
     }
@@ -60,23 +80,40 @@ public class ReviewClientController {
    */
   @GetMapping("product/{productId}/average-rating")
   public ResponseEntity<?> getProductAverageRating(@PathVariable String productId) {
-    logger.info("Received request to fetch average rating for productId={}", productId);
+
+    if (logger.isInfoEnabled()) {
+      logger.info("Received request to fetch average rating for productId={}", productId);
+    }
+
     try {
       ResponseEntity<Double> response = reviewService.getAverageRating(productId);
 
       if (response.getBody() == null) {
-        logger.warn("No reviews found for productId={}", productId);
+        if (logger.isWarnEnabled()) {
+          logger.warn("No reviews found for productId={}", productId);
+        }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body("No reviews found for productId: " + productId);
       }
 
-      logger.info("Successfully fetched average rating for productId={} : {}", productId, response.getBody());
+      if (logger.isInfoEnabled()) {
+        logger.info(
+            "Successfully fetched average rating for productId={} : {}",
+            productId,
+            response.getBody());
+      }
       return ResponseEntity.ok(response.getBody());
+
     } catch (IllegalArgumentException e) {
-      logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      if (logger.isWarnEnabled()) {
+        logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      }
       return ResponseEntity.badRequest().body(e.getMessage());
+
     } catch (Exception e) {
-      logger.error("Error fetching product rating for productId={}", productId, e);
+      if (logger.isErrorEnabled()) {
+        logger.error("Error fetching product rating for productId={}", productId, e);
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to fetch product rating: " + e.getMessage());
     }
@@ -90,23 +127,40 @@ public class ReviewClientController {
    */
   @GetMapping("company/{companyId}/average-rating")
   public ResponseEntity<?> getCompanyAverageRating(@PathVariable String companyId) {
-    logger.info("Received request to fetch average rating for companyId={}", companyId);
+
+    if (logger.isInfoEnabled()) {
+      logger.info("Received request to fetch average rating for companyId={}", companyId);
+    }
+
     try {
       ResponseEntity<Double> response = companyService.getAverageRating(companyId);
 
       if (response.getBody() == null) {
-        logger.warn("No reviews found for companyId={}", companyId);
+        if (logger.isWarnEnabled()) {
+          logger.warn("No reviews found for companyId={}", companyId);
+        }
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body("No reviews found for companyId: " + companyId);
       }
 
-      logger.info("Successfully fetched average rating for companyId={} : {}", companyId, response.getBody());
+      if (logger.isInfoEnabled()) {
+        logger.info(
+            "Successfully fetched average rating for companyId={} : {}",
+            companyId,
+            response.getBody());
+      }
       return ResponseEntity.ok(response.getBody());
+
     } catch (IllegalArgumentException e) {
-      logger.warn("Bad request for companyId={}: {}", companyId, e.getMessage());
+      if (logger.isWarnEnabled()) {
+        logger.warn("Bad request for companyId={}: {}", companyId, e.getMessage());
+      }
       return ResponseEntity.badRequest().body(e.getMessage());
+
     } catch (Exception e) {
-      logger.error("Error fetching company rating for companyId={}", companyId, e);
+      if (logger.isErrorEnabled()) {
+        logger.error("Error fetching company rating for companyId={}", companyId, e);
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to fetch company rating: " + e.getMessage());
     }

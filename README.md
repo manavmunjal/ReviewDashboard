@@ -14,7 +14,7 @@ A Spring Boot application designed to manage product reviews and integrate with 
 
 ### 2. **Service Integration**
 - **Feign Clients**: Utilizes Spring Cloud OpenFeign to communicate with external `Review` and `Company` microservices.
-- **Service Layer**: Abstracts external service calls, providing a clean interface for the controller.
+- **Service Layer**: Abstracts external service calls and provides a clean interface for the controller.
 
 ### 3. **Spring Boot Application**
 - **Rapid Development**: Built with Spring Boot for quick setup and deployment.
@@ -22,6 +22,7 @@ A Spring Boot application designed to manage product reviews and integrate with 
 
 ### 4. **Robust Testing**
 - **Unit Tests**: Comprehensive unit tests for controllers, services, and DTOs using JUnit 5 and Mockito.
+- **Integration Tests**: Web layer integration tests using `@WebMvcTest` to verify controller behavior.
 - **Test Coverage**: Integrated JaCoCo for measuring code coverage.
 
 ## Project Structure
@@ -33,35 +34,30 @@ ReviewDashboard/
 │   │   ├── java/com/reviewdashboard/
 │   │   │   ├── ReviewDashBoardApplication.java # Main Spring Boot entry point
 │   │   │   ├── client/                       # Feign clients for external services
-│   │   │   │   ├── CompanyClient.java
-│   │   │   │   └── ReviewClient.java
+│   │   │   │   ├── CompanyClient.java        # Client for Company Service
+│   │   │   │   └── ProductClient.java        # Client for Product Service
 │   │   │   ├── controller/                   # REST API controllers
 │   │   │   │   └── ReviewClientController.java
 │   │   │   ├── model/                        # Data Transfer Objects (DTOs)
-│   │   │   │   ├── CompanyDTO.java
-│   │   │   │   ├── ReviewDTO.java
-│   │   │   │   └── UserDTO.java
+│   │   │   │   ├── ReviewDto.java
+│   │   │   │   └── UserDto.java
 │   │   │   └── service/                      # Business logic services
 │   │   │       ├── CompanyService.java
 │   │   │       └── ReviewService.java
 │   │   └── resources/
-│   │       └── application.yaml              # Spring Boot configuration
+│   │       └── application.properties        # Spring Boot configuration
 │   └── test/
 │       ├── java/com/reviewdashboard/
 │       │   ├── ReviewDashBoardApplicationTest.java
-│       │   ├── client/
-│       │   │   # No direct tests for Feign clients (integration tests usually cover this)
 │       │   ├── controller/
-│       │   │   └── ReviewClientControllerTest.java
+│       │   │   ├── ReviewClientControllerTest.java           # Unit tests
+│       │   │   └── ReviewClientControllerIntegrationTest.java  # Integration tests
 │       │   ├── model/
-│       │   │   ├── ReviewDTOTest.java
-│       │   │   └── UserDTOTest.java
+│       │   │   ├── ReviewDtoTest.java
+│       │   │   └── UserDtoTest.java
 │       │   └── service/
 │       │       ├── CompanyServiceTest.java
 │       │       └── ReviewServiceTest.java
-│       └── resources/
-│           └── mockito-extensions/
-│               └── org.mockito.plugins.MockMaker # Mockito inline mock maker config
 ├── pom.xml                                   # Maven configuration
 └── README.md                                 # Project documentation
 
@@ -69,7 +65,7 @@ ReviewDashboard/
 
 - **Java 17+**: Modern Java development
 - **Spring Boot 3.3.2**: Framework for building stand-alone, production-grade Spring applications
-- **Spring Cloud OpenFeign**: Declarative REST client for easy service integration
+- **Spring Cloud 2023.0.6 (OpenFeign)**: Declarative REST client for easy service integration
 - **JUnit Jupiter 5**: Testing framework
 - **Mockito**: Mocking framework for unit tests
 - **Maven**: Build automation and dependency management
@@ -114,35 +110,35 @@ java -jar target/myapp-0.0.1-SNAPSHOT.jar
 
 ## REST API Endpoints
 
-All endpoints are prefixed with `/api`.
+All endpoints are prefixed with `/review`.
 
-- `POST /api/review/{productId}`
+- `POST /review/product/{productId}`
   - **Description**: Submits a new review for a given product.
-  - **Request Body**: `ReviewDTO` (JSON)
-  - **Returns**: `ReviewDTO`
+  - **Request Body**: `ReviewDto` (JSON)
+  - **Returns**: `ResponseEntity<ReviewDto>` with status `201 CREATED`.
   - **Example**:
     ```json
-    POST http://localhost:8080/api/review/product123
+    POST http://localhost:8080/review/product/product123
     Content-Type: application/json
 
     {
       "comment": "This product is amazing!",
-      "rating": 5.0,
+      "rating": 5,
       "user": {
         "username": "testUser"
       }
     }
     ```
 
-- `GET /api/review/product/{productId}/average-rating`
+- `GET /review/product/{productId}/average-rating`
   - **Description**: Retrieves the average rating for a specific product.
   - **Returns**: `ResponseEntity<Double>`
-  - **Example**: `GET http://localhost:8080/api/review/product123/average-rating`
+  - **Example**: `GET http://localhost:8080/review/product/product123/average-rating`
 
-- `GET /api/review/company/{companyId}/average-rating`
+- `GET /review/company/{companyId}/average-rating`
   - **Description**: Retrieves the average rating for a specific company.
   - **Returns**: `ResponseEntity<Double>`
-  - **Example**: `GET http://localhost:8080/api/review/company456/average-rating`
+  - **Example**: `GET http://localhost:8080/review/company/company456/average-rating`
 
 ## Testing Requirements
 
@@ -160,11 +156,15 @@ To see the JaCoCo report, open:
 
 ### Unit Tests Coverage:
 - `ReviewDashBoardApplicationTest`: Verifies application context loading.
-- `ReviewClientControllerTest`: Tests API endpoints and service delegation.
+- `ReviewClientControllerTest`: Unit tests for controller logic and error handling.
+- `ReviewClientControllerIntegrationTest`: Integration tests for the web layer, verifying request/response handling.
 - `CompanyServiceTest`: Tests logic related to company average ratings.
 - `ReviewServiceTest`: Tests logic related to adding reviews and product average ratings.
-- `UserDTOTest`: Verifies `UserDTO` getters and setters.
-- `ReviewDTOTest`: Verifies `ReviewDTO` getters, setters, and ID generation.
+- `UserDtoTest`: Verifies `UserDto` getters and setters.
+- `ReviewDtoTest`: Verifies `ReviewDto` getters and setters.
+
+- Coverage Report : 
+- ![Test Coverage](src/main/resources/test-coverage.png)
 
 ## AI Usage
 
