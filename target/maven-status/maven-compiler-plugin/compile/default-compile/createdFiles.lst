@@ -1,8 +1,0 @@
-com/reviewdashboard/controller/ReviewClientController.class
-com/reviewdashboard/model/UserDto.class
-com/reviewdashboard/service/CompanyService.class
-com/reviewdashboard/service/ReviewService.class
-com/reviewdashboard/model/ReviewDto.class
-com/reviewdashboard/client/ReviewClient.class
-com/reviewdashboard/client/CompanyClient.class
-com/reviewdashboard/ReviewDashBoardApplication.class
