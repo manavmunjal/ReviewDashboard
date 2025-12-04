@@ -68,11 +68,12 @@ public class ReviewClientControllerIntegrationTest {
    */
   @Test
   public void testAddReview_Success() throws Exception {
-    when(reviewService.addReview(anyString(), any(ReviewDto.class))).thenReturn(review);
+    when(reviewService.addReview(anyString(), any(ReviewDto.class), anyString())).thenReturn(review);
 
     mockMvc
         .perform(
             post("/review/product/123")
+                .header("X-User-Id", "user123")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isCreated())
@@ -91,10 +92,10 @@ public class ReviewClientControllerIntegrationTest {
    */
   @Test
   public void testGetProductAverageRating_Success() throws Exception {
-    when(reviewService.getAverageRating("123")).thenReturn(ResponseEntity.ok(4.5));
+    when(reviewService.getAverageRating("123", "user123")).thenReturn(ResponseEntity.ok(4.5));
 
     mockMvc
-        .perform(get("/review/product/123/average-rating"))
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "user123"))
         .andExpect(status().isOk())
         .andExpect(content().string("4.5"));
   }
@@ -109,10 +110,10 @@ public class ReviewClientControllerIntegrationTest {
    */
   @Test
   public void testGetProductAverageRating_NotFound() throws Exception {
-    when(reviewService.getAverageRating("123")).thenReturn(ResponseEntity.ok(null));
+    when(reviewService.getAverageRating("123", "user123")).thenReturn(ResponseEntity.ok(null));
 
     mockMvc
-        .perform(get("/review/product/123/average-rating"))
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "user123"))
         .andExpect(status().isNotFound())
         .andExpect(content().string("No reviews found for productId: 123"));
   }

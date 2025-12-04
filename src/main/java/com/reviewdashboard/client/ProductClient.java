@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 /**
  * A Feign client for communicating with the Product/Review service.
@@ -22,17 +23,24 @@ public interface ProductClient {
    *
    * @param productId The unique identifier of the product being reviewed.
    * @param review The review data to be posted.
+   * @param userId The user ID for authentication.
    * @return The created {@link ReviewDto} as confirmed by the service.
    */
   @PostMapping("/{productId}/reviews")
-  ReviewDto postReview(@PathVariable("productId") String productId, @RequestBody ReviewDto review);
+  ReviewDto postReview(
+      @PathVariable("productId") String productId,
+      @RequestBody ReviewDto review,
+      @RequestHeader("X-User-Id") String userId);
 
   /**
    * Retrieves the average rating for a specific product by its ID.
    *
    * @param productId The unique identifier of the product.
+   * @param userId The user ID for authentication.
    * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
    */
   @GetMapping("/{productId}/average-rating")
-  ResponseEntity<Double> getAverageRating(@PathVariable String productId);
+  ResponseEntity<Double> getAverageRating(
+      @PathVariable String productId,
+      @RequestHeader("X-User-Id") String userId);
 }

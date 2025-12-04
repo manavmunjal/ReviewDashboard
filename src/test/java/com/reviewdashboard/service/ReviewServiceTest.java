@@ -74,9 +74,9 @@ public class ReviewServiceTest {
    */
   @Test
   public void testAddReview_Valid() {
-    when(productClient.postReview(anyString(), any(ReviewDto.class))).thenReturn(review);
+    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString())).thenReturn(review);
 
-    ReviewDto result = reviewService.addReview("123", review);
+    ReviewDto result = reviewService.addReview("123", review, "user123");
 
     assertEquals(review, result);
   }
@@ -88,10 +88,11 @@ public class ReviewServiceTest {
    */
   @Test
   public void testAddReview_InvalidProductId() {
-    when(productClient.postReview(anyString(), any(ReviewDto.class)))
+    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString()))
         .thenThrow(new IllegalArgumentException("Invalid product ID"));
 
-    assertThrows(IllegalArgumentException.class, () -> reviewService.addReview("invalid", review));
+    assertThrows(
+        IllegalArgumentException.class, () -> reviewService.addReview("invalid", review, "user123"));
   }
 
   /**
@@ -102,11 +103,12 @@ public class ReviewServiceTest {
   @Test
   public void testAddReview_InvalidReview() {
     ReviewDto invalidReview = new ReviewDto(); // missing comment and rating
-    when(productClient.postReview(anyString(), any(ReviewDto.class)))
+    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString()))
         .thenThrow(new IllegalArgumentException("Invalid review"));
 
     assertThrows(
-        IllegalArgumentException.class, () -> reviewService.addReview("123", invalidReview));
+        IllegalArgumentException.class,
+        () -> reviewService.addReview("123", invalidReview, "user123"));
   }
 
   /**
@@ -116,10 +118,10 @@ public class ReviewServiceTest {
    */
   @Test
   public void testAddReview_UnexpectedError() {
-    when(productClient.postReview(anyString(), any(ReviewDto.class)))
+    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString()))
         .thenThrow(new RuntimeException("Service unavailable"));
 
-    assertThrows(RuntimeException.class, () -> reviewService.addReview("123", review));
+    assertThrows(RuntimeException.class, () -> reviewService.addReview("123", review, "user123"));
   }
 
   // ---------------- getAverageRating tests ----------------
@@ -132,9 +134,9 @@ public class ReviewServiceTest {
   @Test
   public void testGetAverageRating_ValidWithRatings() {
     ResponseEntity<Double> response = ResponseEntity.ok(4.5);
-    when(productClient.getAverageRating(anyString())).thenReturn(response);
+    when(productClient.getAverageRating(anyString(), anyString())).thenReturn(response);
 
-    ResponseEntity<Double> result = reviewService.getAverageRating("456");
+    ResponseEntity<Double> result = reviewService.getAverageRating("456", "user123");
 
     assertEquals(response, result);
     assertEquals(4.5, result.getBody());
@@ -148,9 +150,9 @@ public class ReviewServiceTest {
   @Test
   public void testGetAverageRating_ValidNoRatings() {
     ResponseEntity<Double> response = ResponseEntity.ok(null);
-    when(productClient.getAverageRating(anyString())).thenReturn(response);
+    when(productClient.getAverageRating(anyString(), anyString())).thenReturn(response);
 
-    ResponseEntity<Double> result = reviewService.getAverageRating("456");
+    ResponseEntity<Double> result = reviewService.getAverageRating("456", "user123");
 
     assertEquals(null, result.getBody());
   }
@@ -162,10 +164,11 @@ public class ReviewServiceTest {
    */
   @Test
   public void testGetAverageRating_InvalidProductId() {
-    when(productClient.getAverageRating(anyString()))
+    when(productClient.getAverageRating(anyString(), anyString()))
         .thenThrow(new IllegalArgumentException("Invalid product ID"));
 
-    assertThrows(IllegalArgumentException.class, () -> reviewService.getAverageRating("invalid"));
+    assertThrows(
+        IllegalArgumentException.class, () -> reviewService.getAverageRating("invalid", "user123"));
   }
 
   /**
@@ -175,9 +178,9 @@ public class ReviewServiceTest {
    */
   @Test
   public void testGetAverageRating_UnexpectedError() {
-    when(productClient.getAverageRating(anyString()))
+    when(productClient.getAverageRating(anyString(), anyString()))
         .thenThrow(new RuntimeException("Service unavailable"));
 
-    assertThrows(RuntimeException.class, () -> reviewService.getAverageRating("123"));
+    assertThrows(RuntimeException.class, () -> reviewService.getAverageRating("123", "user123"));
   }
 }

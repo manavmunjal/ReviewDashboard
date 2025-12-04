@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,18 +39,21 @@ public class ReviewClientController {
    *
    * @param productId The product ID.
    * @param review The review DTO.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and body.
    */
   @PostMapping("product/{productId}")
   public ResponseEntity<?> addReview(
-      @PathVariable String productId, @RequestBody ReviewDto review) {
+      @PathVariable String productId,
+      @RequestBody ReviewDto review,
+      @RequestHeader("X-User-Id") String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to add review for productId={}", productId);
     }
 
     try {
-      ReviewDto createdReview = reviewService.addReview(productId, review);
+      ReviewDto createdReview = reviewService.addReview(productId, review, userId);
 
       if (logger.isInfoEnabled()) {
         logger.info("Successfully added review for productId={}", productId);
@@ -76,17 +80,20 @@ public class ReviewClientController {
    * Retrieves the average rating for a product.
    *
    * @param productId The product ID.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and average rating.
    */
   @GetMapping("product/{productId}/average-rating")
-  public ResponseEntity<?> getProductAverageRating(@PathVariable String productId) {
+  public ResponseEntity<?> getProductAverageRating(
+      @PathVariable String productId,
+      @RequestHeader("X-User-Id") String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for productId={}", productId);
     }
 
     try {
-      ResponseEntity<Double> response = reviewService.getAverageRating(productId);
+      ResponseEntity<Double> response = reviewService.getAverageRating(productId, userId);
 
       if (response.getBody() == null) {
         if (logger.isWarnEnabled()) {
@@ -123,17 +130,20 @@ public class ReviewClientController {
    * Retrieves the average rating for a company.
    *
    * @param companyId The company ID.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and average rating.
    */
   @GetMapping("company/{companyId}/average-rating")
-  public ResponseEntity<?> getCompanyAverageRating(@PathVariable String companyId) {
+  public ResponseEntity<?> getCompanyAverageRating(
+      @PathVariable String companyId,
+      @RequestHeader("X-User-Id") String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for companyId={}", companyId);
     }
 
     try {
-      ResponseEntity<Double> response = companyService.getAverageRating(companyId);
+      ResponseEntity<Double> response = companyService.getAverageRating(companyId, userId);
 
       if (response.getBody() == null) {
         if (logger.isWarnEnabled()) {
