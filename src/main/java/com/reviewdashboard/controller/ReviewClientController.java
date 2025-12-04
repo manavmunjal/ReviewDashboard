@@ -36,6 +36,15 @@ public class ReviewClientController {
   /**
    * Adds a review for a product.
    *
+   * <p><b>Equivalence Partitions (EPs)</b>
+   *
+   * <p><b>Valid EPs:</b> - EP1: Valid productId AND valid ReviewDto: • rating ∈ [1,5] • all
+   * mandatory fields present
+   *
+   * <p><b>Invalid EPs:</b> - EP2: productId null/empty - EP3: ReviewDto null - EP4: rating < 1 -
+   * EP5: rating > 5 - EP6: missing mandatory ReviewDto fields - EP7: productId valid but product
+   * not found
+   *
    * @param productId The product ID.
    * @param review The review DTO.
    * @return ResponseEntity with status and body.
@@ -50,6 +59,13 @@ public class ReviewClientController {
 
     try {
       ReviewDto createdReview = reviewService.addReview(productId, review);
+
+      if (createdReview.getRating() < 1 || createdReview.getRating() > 5) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Invalid rating for productId={}", productId);
+        }
+        return ResponseEntity.badRequest().body("Invalid rating");
+      }
 
       if (logger.isInfoEnabled()) {
         logger.info("Successfully added review for productId={}", productId);
@@ -74,6 +90,14 @@ public class ReviewClientController {
 
   /**
    * Retrieves the average rating for a product.
+   *
+   * <p><b>Equivalence Partitions (EPs)</b>
+   *
+   * <p><b>Valid EPs:</b> - EP1: Valid productId with ≥1 review → returns average rating - EP2:
+   * Valid productId with 0 reviews → returns 404
+   *
+   * <p><b>Invalid EPs:</b> - EP3: productId null/empty - EP4: productId valid but product not found
+   * - EP5: service/DB exception → returns 500
    *
    * @param productId The product ID.
    * @return ResponseEntity with status and average rating.
@@ -121,6 +145,14 @@ public class ReviewClientController {
 
   /**
    * Retrieves the average rating for a company.
+   *
+   * <p><b>Equivalence Partitions (EPs)</b>
+   *
+   * <p><b>Valid EPs:</b> - EP1: Valid companyId with ≥1 review → returns average rating - EP2:
+   * Valid companyId with 0 reviews → returns 404
+   *
+   * <p><b>Invalid EPs:</b> - EP3: companyId null/empty - EP4: companyId valid but company not found
+   * - EP5: service/DB exception → returns 500
    *
    * @param companyId The company ID.
    * @return ResponseEntity with status and average rating.
