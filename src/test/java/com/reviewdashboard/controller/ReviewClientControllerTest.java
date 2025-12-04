@@ -11,7 +11,9 @@ import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -25,13 +27,14 @@ import org.springframework.http.ResponseEntity;
  * <p>The tests cover successful execution, validation errors (bad requests), not found scenarios,
  * and unexpected internal server errors.
  */
+@ExtendWith(MockitoExtension.class)
 public class ReviewClientControllerTest {
 
   /** Mocked instance of {@link ReviewService} to isolate the controller during tests. */
-  private ReviewService reviewService;
+  @Mock private ReviewService reviewService;
 
   /** Mocked instance of {@link CompanyService} to isolate the controller during tests. */
-  private CompanyService companyService;
+  @Mock private CompanyService companyService;
 
   /** The {@link ReviewClientController} instance under test. */
   private ReviewClientController controller;
@@ -44,8 +47,6 @@ public class ReviewClientControllerTest {
    */
   @BeforeEach
   public void setUp() {
-    reviewService = Mockito.mock(ReviewService.class);
-    companyService = Mockito.mock(CompanyService.class);
     controller = new ReviewClientController(reviewService, companyService);
   }
 
