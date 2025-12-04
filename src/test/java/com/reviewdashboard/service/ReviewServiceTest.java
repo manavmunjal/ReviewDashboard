@@ -74,7 +74,8 @@ public class ReviewServiceTest {
    */
   @Test
   public void testAddReview_Valid() {
-    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString())).thenReturn(review);
+    when(productClient.postReview(anyString(), any(ReviewDto.class), anyString()))
+        .thenReturn(review);
 
     ReviewDto result = reviewService.addReview("123", review, "user123");
 
@@ -92,7 +93,8 @@ public class ReviewServiceTest {
         .thenThrow(new IllegalArgumentException("Invalid product ID"));
 
     assertThrows(
-        IllegalArgumentException.class, () -> reviewService.addReview("invalid", review, "user123"));
+        IllegalArgumentException.class,
+        () -> reviewService.addReview("invalid", review, "user123"));
   }
 
   /**

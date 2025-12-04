@@ -68,7 +68,8 @@ public class ReviewClientControllerIntegrationTest {
    */
   @Test
   public void testAddReview_Success() throws Exception {
-    when(reviewService.addReview(anyString(), any(ReviewDto.class), anyString())).thenReturn(review);
+    when(reviewService.addReview(anyString(), any(ReviewDto.class), anyString()))
+        .thenReturn(review);
 
     mockMvc
         .perform(

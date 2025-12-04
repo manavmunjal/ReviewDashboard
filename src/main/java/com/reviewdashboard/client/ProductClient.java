@@ -41,6 +41,5 @@ public interface ProductClient {
    */
   @GetMapping("/{productId}/average-rating")
   ResponseEntity<Double> getAverageRating(
-      @PathVariable String productId,
-      @RequestHeader("X-User-Id") String userId);
+      @PathVariable String productId, @RequestHeader("X-User-Id") String userId);
 }

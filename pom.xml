@@ -163,9 +163,9 @@
                             <include>src/main/java/**/*.java</include>
                             <include>src/test/java/**/*.java</include>
                         </includes>
-
-                        <!-- Optional: remove unused imports -->
-                        <removeUnusedImports />
+                        
+                        <!-- Keep imports as-is; rely on Checkstyle for unused imports -->
+                        <importOrder><order></order></importOrder>
                     </java>
                 </configuration>
 

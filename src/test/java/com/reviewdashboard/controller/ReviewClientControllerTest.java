@@ -67,7 +67,8 @@ public class ReviewClientControllerTest {
     review.setRating(5);
     review.setUser(new UserDto());
 
-    when(reviewService.addReview(anyString(), any(ReviewDto.class), anyString())).thenReturn(review);
+    when(reviewService.addReview(anyString(), any(ReviewDto.class), anyString()))
+        .thenReturn(review);
 
     ResponseEntity<?> response = controller.addReview(productId, review, userId);
 
@@ -158,7 +159,8 @@ public class ReviewClientControllerTest {
    */
   @Test
   public void testGetProductAverageRating_InternalError() {
-    when(reviewService.getAverageRating("123", "user123")).thenThrow(new RuntimeException("Timeout"));
+    when(reviewService.getAverageRating("123", "user123"))
+        .thenThrow(new RuntimeException("Timeout"));
 
     ResponseEntity<?> response = controller.getProductAverageRating("123", "user123");
 

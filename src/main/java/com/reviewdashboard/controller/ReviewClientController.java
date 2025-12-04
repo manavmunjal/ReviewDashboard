@@ -85,8 +85,7 @@ public class ReviewClientController {
    */
   @GetMapping("product/{productId}/average-rating")
   public ResponseEntity<?> getProductAverageRating(
-      @PathVariable String productId,
-      @RequestHeader("X-User-Id") String userId) {
+      @PathVariable String productId, @RequestHeader("X-User-Id") String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for productId={}", productId);
@@ -135,8 +134,7 @@ public class ReviewClientController {
    */
   @GetMapping("company/{companyId}/average-rating")
   public ResponseEntity<?> getCompanyAverageRating(
-      @PathVariable String companyId,
-      @RequestHeader("X-User-Id") String userId) {
+      @PathVariable String companyId, @RequestHeader("X-User-Id") String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for companyId={}", companyId);
