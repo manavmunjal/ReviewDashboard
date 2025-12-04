@@ -46,10 +46,15 @@ public class ReviewClientController {
   public ResponseEntity<?> addReview(
       @PathVariable String productId,
       @RequestBody ReviewDto review,
-      @RequestHeader("X-User-Id") String userId) {
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to add review for productId={}", productId);
+    }
+
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
     }
 
     try {
@@ -85,10 +90,16 @@ public class ReviewClientController {
    */
   @GetMapping("product/{productId}/average-rating")
   public ResponseEntity<?> getProductAverageRating(
-      @PathVariable String productId, @RequestHeader("X-User-Id") String userId) {
+      @PathVariable String productId,
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for productId={}", productId);
+    }
+
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
     }
 
     try {
@@ -134,10 +145,16 @@ public class ReviewClientController {
    */
   @GetMapping("company/{companyId}/average-rating")
   public ResponseEntity<?> getCompanyAverageRating(
-      @PathVariable String companyId, @RequestHeader("X-User-Id") String userId) {
+      @PathVariable String companyId,
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for companyId={}", companyId);
+    }
+
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
     }
 
     try {
