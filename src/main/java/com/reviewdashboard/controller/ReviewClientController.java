@@ -3,6 +3,7 @@ package com.reviewdashboard.controller;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while adding review for productId={}",
+              userId,
+              productId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error adding review for productId={}", productId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to create review: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error adding review for productId={}", productId, e);
@@ -127,6 +144,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while fetching average rating for productId={}",
+              userId,
+              productId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error fetching product rating for productId={}", productId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch product rating: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error fetching product rating for productId={}", productId, e);
@@ -182,6 +215,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while fetching average rating for companyId={}",
+              userId,
+              companyId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error fetching company rating for companyId={}", companyId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch company rating: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error fetching company rating for companyId={}", companyId, e);
