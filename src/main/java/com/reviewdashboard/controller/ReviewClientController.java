@@ -3,70 +3,112 @@ package com.reviewdashboard.controller;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller that acts as a facade for review and company-related operations.
+ * REST controller for handling product and company reviews.
  *
- * <p>This controller exposes endpoints that delegate calls to the {@link ReviewService} and {@link
- * CompanyService}, which in turn communicate with external microservices via Feign clients.
+ * <p>Each API logs request entry, successful response, and errors.
  */
 @RestController
 @RequestMapping("review")
 public class ReviewClientController {
+
+  private static final Logger logger = LoggerFactory.getLogger(ReviewClientController.class);
+
   private final ReviewService reviewService;
   private final CompanyService companyService;
 
-  /**
-   * Constructs a new ReviewClientController with the necessary service dependencies.
-   *
-   * @param reviewService The service for handling product review operations.
-   * @param companyService The service for handling company-related operations.
-   */
   public ReviewClientController(ReviewService reviewService, CompanyService companyService) {
     this.reviewService = reviewService;
     this.companyService = companyService;
   }
 
   /**
-   * POST /review/product/{productId} : Submits a new review for a given product.
+   * Adds a review for a product.
    *
-   * @param productId The ID of the product to review.
-   * @param review The review data transfer object containing review details.
-   * @return The created {@link ReviewDto} as returned by the review service.
+   * @param productId The product ID.
+   * @param review The review DTO.
+   * @return ResponseEntity with status and body.
    */
   @PostMapping("product/{productId}")
-  public ReviewDto addReview(@PathVariable String productId, @RequestBody ReviewDto review) {
-    return reviewService.addReview(productId, review);
+  public ResponseEntity<?> addReview(@PathVariable String productId, @RequestBody ReviewDto review) {
+    logger.info("Received request to add review for productId={}", productId);
+    try {
+      ReviewDto createdReview = reviewService.addReview(productId, review);
+      logger.info("Successfully added review for productId={}", productId);
+      return ResponseEntity.status(HttpStatus.CREATED).body(createdReview);
+    } catch (IllegalArgumentException e) {
+      logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      logger.error("Error adding review for productId={}", productId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to create review: " + e.getMessage());
+    }
   }
 
   /**
-   * GET /review/product/{productId}/average-rating : Retrieves the average rating for a specific
-   * product.
+   * Retrieves the average rating for a product.
    *
-   * @param productId The ID of the product.
-   * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
+   * @param productId The product ID.
+   * @return ResponseEntity with status and average rating.
    */
   @GetMapping("product/{productId}/average-rating")
-  public ResponseEntity<Double> getProductAverageRating(@PathVariable String productId) {
-    return reviewService.getAverageRating(productId);
+  public ResponseEntity<?> getProductAverageRating(@PathVariable String productId) {
+    logger.info("Received request to fetch average rating for productId={}", productId);
+    try {
+      ResponseEntity<Double> response = reviewService.getAverageRating(productId);
+
+      if (response.getBody() == null) {
+        logger.warn("No reviews found for productId={}", productId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("No reviews found for productId: " + productId);
+      }
+
+      logger.info("Successfully fetched average rating for productId={} : {}", productId, response.getBody());
+      return ResponseEntity.ok(response.getBody());
+    } catch (IllegalArgumentException e) {
+      logger.warn("Bad request for productId={}: {}", productId, e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      logger.error("Error fetching product rating for productId={}", productId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch product rating: " + e.getMessage());
+    }
   }
 
   /**
-   * GET /review/company/{companyId}/average-rating : Retrieves the average rating for a specific
-   * company.
+   * Retrieves the average rating for a company.
    *
-   * @param companyId The ID of the company.
-   * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
+   * @param companyId The company ID.
+   * @return ResponseEntity with status and average rating.
    */
   @GetMapping("company/{companyId}/average-rating")
-  public ResponseEntity<Double> getCompanyAverageRating(@PathVariable String companyId) {
-    return companyService.getAverageRating(companyId);
+  public ResponseEntity<?> getCompanyAverageRating(@PathVariable String companyId) {
+    logger.info("Received request to fetch average rating for companyId={}", companyId);
+    try {
+      ResponseEntity<Double> response = companyService.getAverageRating(companyId);
+
+      if (response.getBody() == null) {
+        logger.warn("No reviews found for companyId={}", companyId);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body("No reviews found for companyId: " + companyId);
+      }
+
+      logger.info("Successfully fetched average rating for companyId={} : {}", companyId, response.getBody());
+      return ResponseEntity.ok(response.getBody());
+    } catch (IllegalArgumentException e) {
+      logger.warn("Bad request for companyId={}: {}", companyId, e.getMessage());
+      return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+      logger.error("Error fetching company rating for companyId={}", companyId, e);
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch company rating: " + e.getMessage());
+    }
   }
 }
