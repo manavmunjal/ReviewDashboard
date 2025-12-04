@@ -176,6 +176,40 @@ All endpoints are prefixed with `/review`.
   - **Returns**: `ResponseEntity<Double>`
   - **Example**: `GET http://localhost:8080/review/company/company456/average-rating`
 
+## Testing on GCP
+
+When the application is deployed to Google Cloud Run, you can test the endpoints using the GCP URL:
+
+**Base URL**: `https://review-dashboard-client-321275563168.us-central1.run.app`
+
+### Example GCP Endpoints:
+
+- **Get Product Average Rating**:
+  ```
+  GET https://review-dashboard-client-321275563168.us-central1.run.app/review/product/{productId}/average-rating
+  ```
+
+- **Get Company Average Rating**:
+  ```
+  GET https://review-dashboard-client-321275563168.us-central1.run.app/review/company/{companyId}/average-rating
+  ```
+
+- **Submit a Review**:
+  ```
+  POST https://review-dashboard-client-321275563168.us-central1.run.app/review/product/{productId}
+  Content-Type: application/json
+
+  {
+    "comment": "Great product!",
+    "user": {
+      "username": "testUser",
+      "email": "jane@example.com"
+    }
+  }
+  ```
+
+**Note**: Replace `{productId}` and `{companyId}` with actual IDs from your database.
+
 ## Testing Requirements
 
 ### Run all tests:

@@ -68,7 +68,7 @@ WORKDIR /app
 COPY --from=build /app/target/review-dashboard-1.0.0.jar .
 
 # Expose the port the application runs on
-EXPOSE 8081
+EXPOSE 8080
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "review-dashboard-1.0.0.jar"]
@@ -85,7 +85,7 @@ ENTRYPOINT ["java", "-jar", "review-dashboard-1.0.0.jar"]
 3.  **`COPY --from=build /app/target/review-dashboard-1.0.0.jar .`**
     *   This is the key command in a multi-stage build. It copies the JAR file that was created in the `build` stage (`/app/target/review-dashboard-1.0.0.jar`) into the current stage. This allows us to transfer the build artifact without carrying over any of the build dependencies.
 
-4.  **`EXPOSE 8081`**
+4.  **`EXPOSE 8080`**
     *   This command informs Docker that the container will listen on port `8081` at runtime. This does not actually publish the port; it serves as documentation and allows for easier port mapping when running the container.
 
 5.  **`ENTRYPOINT ["java", "-jar", "review-dashboard-1.0.0.jar"]`**
