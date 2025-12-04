@@ -4,7 +4,7 @@ This is the official repository for the Review Dashboard project.
 
 ## Project Overview
 
-A Spring Boot application designed to manage product reviews and integrate with external services for company and product information. It provides RESTful APIs for adding reviews and retrieving average ratings for products and companies.
+A Spring Boot Client application designed to manage product reviews and integrate with external services for company and product information. It provides RESTful APIs for adding reviews and retrieving average ratings for products and companies.
 
 ## Key Features
 
@@ -24,6 +24,88 @@ A Spring Boot application designed to manage product reviews and integrate with 
 - **Unit Tests**: Comprehensive unit tests for controllers, services, and DTOs using JUnit 5 and Mockito.
 - **Integration Tests**: Web layer integration tests using `@WebMvcTest` to verify controller behavior.
 - **Test Coverage**: Integrated JaCoCo for measuring code coverage.
+
+## What the Client Does
+
+The Review Dashboard is a Spring Boot application that acts as a client-side facade for a larger microservices ecosystem. It provides a centralized API to interact with separate `review` and `company` services, handling tasks like submitting reviews and fetching aggregated data.
+
+This client is designed to be a lightweight intermediary, abstracting the complexity of direct service-to-service communication from the end-user or frontend application.
+
+## How to Build and Run the Client
+
+### Prerequisites
+
+-   Java 17 or higher
+-   Maven 3.6 or higher
+-   Docker (for running the containerized version)
+
+### Building the Application
+
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd ReviewDashboard
+    ```
+
+2.  **Compile and package the application**:
+    This command will run the tests, check code style, and package the application into an executable JAR file in the `target/` directory.
+    ```bash
+    mvn clean package
+    ```
+
+### Running the Application
+
+You can run the application either directly with Java or as a Docker container.
+
+**Option 1: Running with Java**
+
+```bash
+java -jar target/review-dashboard-1.0.0.jar
+```
+
+**Option 2: Running with Docker**
+
+First, build the Docker image using the provided `Dockerfile`:
+
+```bash
+docker build -t review-dashboard .
+```
+
+Then, run the container:
+
+```bash
+docker run -p 8081:8081 review-dashboard
+```
+
+The application will be accessible at `http://localhost:8081`.
+
+## How to Connect Client Instances to the Service
+
+The Review Dashboard client connects to external `review` and `company` microservices. The URLs for these services are configured in the `src/main/resources/application.yaml` file.
+
+To connect your client instance, you must override the default URLs with the actual addresses of your running services.
+
+### Configuration
+
+The Feign client URLs are defined by the following properties:
+
+-   `review.client.url`
+-   `company.client.url`
+
+You can set these properties when running the application.
+
+**Example:**
+
+If your `review-service` is running at `http://localhost:8082` and your `company-service` is at `http://localhost:8083`, you can run the client with the following command:
+
+```bash
+java -jar target/review-dashboard-1.0.0.jar \
+     --review.client.url=http://localhost:8082 \
+     --company.client.url=http://localhost:8083
+```
+
+This command-line argument approach allows you to dynamically connect your client to different environments (e.g., local, staging, production) without changing the packaged code.
+
 
 ## Project Structure
 
@@ -64,52 +146,6 @@ ReviewDashboard/
 │       │       └── ReviewServiceTest.java
 ├── pom.xml                                   # Maven configuration
 └── README.md                                 # Project documentation
-
-## Technologies Used
-
-- **Java 17+**: Modern Java development
-- **Spring Boot 3.3.2**: Framework for building stand-alone, production-grade Spring applications
-- **Spring Cloud 2023.0.6 (OpenFeign)**: Declarative REST client for easy service integration
-- **JUnit Jupiter 5**: Testing framework
-- **Mockito**: Mocking framework for unit tests
-- **Maven**: Build automation and dependency management
-- **JaCoCo**: Code coverage reporting
-
-## Getting Started
-
-### Prerequisites
-- Java 17 or higher
-- Maven 3.6 or higher
-
-### Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd ReviewDashboard
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   mvn clean install
-   ```
-
-3. **Compile the project**:
-   ```bash
-   mvn clean compile
-   ```
-
-### Running the Application
-
-**Option 1: Using Maven Spring Boot plugin**
-```bash
-mvn spring-boot:run
-```
-
-**Option 2: Build JAR and run**
-```bash
-mvn package
-java -jar target/myapp-0.0.1-SNAPSHOT.jar
 ```
 
 ## REST API Endpoints
@@ -122,9 +158,9 @@ Review endpoints are prefixed with `/review`. User creation is under `/auth`.
   - **Headers**: `X-User-Id: <yourUserId>`
   - **Returns**: `ResponseEntity<ReviewDto>` with status `201 CREATED`.
   - **Example**:
+  - `POST http://localhost:8080/review/product/product123
+    Content-Type: application/json`
     ```json
-    POST http://localhost:8080/review/product/product123
-    Content-Type: application/json
 
     {
       "comment": "This product is amazing!",
@@ -246,4 +282,5 @@ To see the JaCoCo report, open:
 ## Authors
 - Development Team: [Manav Munjal, Sreenivas Karthik Bandi, Song Li and Sindhu Krishnamurthy]
 
+---
 ---
