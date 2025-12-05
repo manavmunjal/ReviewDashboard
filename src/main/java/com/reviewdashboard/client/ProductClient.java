@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /**
  * A Feign client for communicating with the Product/Review service.
  *
- * <p>This interface defines methods to make HTTP requests to the product and review-related
+ * <p>This interface defines methods to make HTTP requests
+ * to the product and review-related
  * endpoints available at the specified URL.
  */
 @FeignClient(name = "reviewClient", url = "${product.client.url}")
@@ -37,9 +38,11 @@ public interface ProductClient {
    *
    * @param productId The unique identifier of the product.
    * @param userId The user ID for authentication.
-   * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
+   * @return A {@link ResponseEntity}
+   * containing the average rating as a {@link Double}.
    */
   @GetMapping("/{productId}/average-rating")
   ResponseEntity<Double> getAverageRating(
-      @PathVariable String productId, @RequestHeader("X-User-Id") String userId);
+      @PathVariable String productId,
+      @RequestHeader("X-User-Id") String userId);
 }
