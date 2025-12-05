@@ -40,10 +40,10 @@ public class ReviewClientController {
    *
    * <p><b>Equivalence Partitions (EPs)</b>
    *
-   * <p><b>Valid EPs:</b> - EP1: Valid productId AND valid ReviewDto: • rating ∈ [1,5] • all
+   * <p><b>Valid EPs:</b> - EP1: Valid productId AND valid ReviewDto: • rating ∈ [0,5] • all
    * mandatory fields present
    *
-   * <p><b>Invalid EPs:</b> - EP2: productId null/empty - EP3: ReviewDto null - EP4: rating < 1 -
+   * <p><b>Invalid EPs:</b> - EP2: productId null/empty - EP3: ReviewDto null - EP4: rating < 0 -
    * EP5: rating > 5 - EP6: missing mandatory ReviewDto fields - EP7: productId valid but product
    * not found
    *
@@ -70,7 +70,7 @@ public class ReviewClientController {
     try {
       ReviewDto createdReview = reviewService.addReview(productId, review, userId);
 
-      if (createdReview.getRating() < 1 || createdReview.getRating() > 5) {
+      if (createdReview.getRating() < 0.0 || createdReview.getRating() > 5.0) {
         if (logger.isWarnEnabled()) {
           logger.warn("Invalid rating for productId={}", productId);
         }
@@ -198,7 +198,7 @@ public class ReviewClientController {
    *
    * <p><b>Equivalence Partitions (EPs)</b>
    *
-   * <p><b>Valid EPs:</b> - EP1: Valid companyId with ≥1 review → returns average rating - EP2:
+   * <p><b>Valid EPs:</b> - EP1: Valid companyId with ≥0 review → returns average rating - EP2:
    * Valid companyId with 0 reviews → returns 404
    *
    * <p><b>Invalid EPs:</b> - EP3: companyId null/empty - EP4: companyId valid but company not found

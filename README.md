@@ -293,7 +293,16 @@ To see the JaCoCo report, open:
 - `ReviewDtoTest`: Verifies `ReviewDto` getters and setters.
 
 - Coverage Report : 
-- ![Test Coverage](src/main/resources/test-coverage.png)
+![Test Coverage](src/main/resources/test-coverage.png)
+
+## CheckStyle 
+We used Maven CheckStyle to ensure consistent coding standards across the project.
+All source files were validated against the CheckStyle rules defined in the project’s configuration (including formatting, naming conventions, Javadoc requirements, and code layout).
+
+A CheckStyle report screenshot will be attached as part of the submission to demonstrate that the project passes all required checks.
+
+- Checkstyle Report :
+- ![Checkstyle Report](src/main/resources/checkstyle-coverage.png)
 
 ## AI Usage
 
