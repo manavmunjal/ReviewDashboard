@@ -155,11 +155,20 @@ CLOUD URL: `https://review-dashboard-client-321275563168.us-central1.run.app`
 
 Review endpoints are prefixed with `/review`. User creation is under `/auth`.
 
+Important header requirement
+- All review endpoints require the header: `X-User-Id: <yourUserId>`.
+- If the header is missing, the API returns `400 Bad Request` with message: "Please provide a userID in a header".
+- If the user ID does not exist upstream, the API returns `401 Unauthorized` with message: "Your user ID does not exist. Please create a new user." Use the Auth endpoint below to create one.
+
 - `POST /review/product/{productId}`
   - **Description**: Submits a new review for a given product.
   - **Request Body**: `ReviewDto` (JSON)
-  - **Headers**: `X-User-Id: <yourUserId>`
-  - **Returns**: `ResponseEntity<ReviewDto>` with status `201 CREATED`.
+  - **Headers (required)**: `X-User-Id: <yourUserId>`
+  - **Status Codes**:
+    - `201 Created` — Review created; returns `ReviewDto`.
+    - `400 Bad Request` — Missing `X-User-Id` header, invalid rating (<1 or >5), or invalid payload.
+    - `401 Unauthorized` — Unknown `X-User-Id`.
+    - `500 Internal Server Error` — Upstream/service error.
   - **Example**:
   - `POST http://localhost:8080/review/product/product123
     Content-Type: application/json`
@@ -176,14 +185,24 @@ Review endpoints are prefixed with `/review`. User creation is under `/auth`.
 
 - `GET /review/product/{productId}/average-rating`
   - **Description**: Retrieves the average rating for a specific product.
-  - **Headers**: `X-User-Id: <yourUserId>`
-  - **Returns**: `ResponseEntity<Double>`
+  - **Headers (required)**: `X-User-Id: <yourUserId>`
+  - **Status Codes**:
+    - `200 OK` — Returns `Double` average rating.
+    - `400 Bad Request` — Missing `X-User-Id` header or invalid request.
+    - `401 Unauthorized` — Unknown `X-User-Id`.
+    - `404 Not Found` — No reviews found for the product.
+    - `500 Internal Server Error` — Upstream/service error.
   - **Example**: `GET http://localhost:8080/review/product/product123/average-rating`
 
 - `GET /review/company/{companyId}/average-rating`
   - **Description**: Retrieves the average rating for a specific company.
-  - **Headers**: `X-User-Id: <yourUserId>`
-  - **Returns**: `ResponseEntity<Double>`
+  - **Headers (required)**: `X-User-Id: <yourUserId>`
+  - **Status Codes**:
+    - `200 OK` — Returns `Double` average rating.
+    - `400 Bad Request` — Missing `X-User-Id` header or invalid request.
+    - `401 Unauthorized` — Unknown `X-User-Id`.
+    - `404 Not Found` — No reviews found for the company.
+    - `500 Internal Server Error` — Upstream/service error.
   - **Example**: `GET http://localhost:8080/review/company/company456/average-rating`
 
 ### Auth
@@ -194,11 +213,11 @@ Review endpoints are prefixed with `/review`. User creation is under `/auth`.
     ```json
     { "userId": "user123" }
     ```
-  - **Returns**: `201 Created` with body `"User created"`.
-  - **Errors (human-readable)**:
-    - `409`: "This user ID is already taken. Please choose another."
-    - `400`: "Invalid userId. Please try a different value."
-    - Other: `500` with a brief message.
+  - **Status Codes**:
+    - `201 Created` — Body: `"User created"`.
+    - `400 Bad Request` — Missing/blank `userId` or invalid `userId` upstream.
+    - `409 Conflict` — "This user ID is already taken. Please choose another."
+    - `500 Internal Server Error` — Upstream error or unexpected upstream status.
 
 ### Friendly Errors
 - If `X-User-Id` is missing: `400` with "Please provide a userID in a header".
