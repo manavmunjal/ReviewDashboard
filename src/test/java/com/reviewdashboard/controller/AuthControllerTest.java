@@ -19,6 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+/**
+ * Unit tests for {@link AuthController}.
+ *
+ * <p>This test class validates the behavior of the controller in isolation by mocking the {@link
+ * AuthService} dependency. It covers all equivalence partitions for the user creation endpoint,
+ * including success, validation failures, and various downstream error conditions.
+ */
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
 

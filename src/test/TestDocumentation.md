@@ -1,167 +1,118 @@
-# Review Dashboard - Test Documentation
+# Project Test Documentation
 
-This document provides a detailed overview of the tests for the `review-dashboard` project. It outlines the purpose of each test class and describes the specific equivalence partitions covered by each test method.
+This document provides a comprehensive overview of the testing strategy and test suites for the Review Dashboard application, with a focus on the equivalence partitions covered by each test.
+
+## 1. Testing Strategy
+
+Our testing strategy is divided into two main categories:
+
+-   **Unit Tests**: These tests focus on individual components (classes and methods) in isolation. We use **JUnit 5** for the test structure and **Mockito** to mock dependencies, ensuring that we are only testing the logic of the unit under test. Each test is designed to cover a specific equivalence partition (EP) of the possible inputs.
+-   **Integration Tests**: Integration test classes : `ReviewDashBoardApplicationTest`,`ReviewClientControllerTest`, and `ReviewClientControllerIntegrationTest`
+## 2. Unit Test Suite
+
+Unit tests are located in `src/test/java/com/reviewdashboard/` and are designed to be fast and focused.
+
+### 2.1. Controller Tests (`ReviewClientControllerTest.java`)
+
+-   **Objective**: To verify that the controller correctly handles web requests, delegates calls to its service dependencies, and returns the appropriate HTTP responses based on different input partitions.
+-   **Frameworks**: `@WebMvcTest`, Mockito
 
 ---
 
-## 1. Application Context Test
+#### **Endpoint: `POST /review/product/{productId}`**
+
+| Test Case                       | Equivalence Partition (EP)                               | Expected Outcome      |
+| ------------------------------- | -------------------------------------------------------- | --------------------- |
+| `addReview_success`             | **EP: Valid** - A valid review DTO is submitted.         | `201 CREATED`         |
+| `addReview_invalidRatingLow`    | **EP: Invalid** - The review's rating is less than 1.    | `400 BAD REQUEST`     |
+| `addReview_invalidRatingHigh`   | **EP: Invalid** - The review's rating is greater than 5. | `400 BAD REQUEST`     |
+| `addReview_internalError`       | **EP: Invalid** - The service layer throws an exception. | `500 INTERNAL SERVER ERROR` |
+
+---
+
+#### **Endpoint: `GET /review/product/{productId}/average-rating`**
+
+| Test Case                          | Equivalence Partition (EP)                               | Expected Outcome      |
+| ---------------------------------- | -------------------------------------------------------- | --------------------- |
+| `getProductAverageRating_success`  | **EP: Valid** - The product has existing reviews.        | `200 OK`              |
+| `getProductAverageRating_notFound` | **EP: Valid** - The product has no reviews.              | `404 NOT FOUND`       |
+| `getProductAverageRating_invalidId`| **EP: Invalid** - The product ID in the URL is malformed.| `405 METHOD NOT ALLOWED`|
+| `getProductAverageRating_internalError`| **EP: Invalid** - The service layer throws an exception. | `500 INTERNAL SERVER ERROR` |
+
+---
+
+#### **Endpoint: `GET /review/company/{companyId}/average-rating`**
+
+| Test Case                         | Equivalence Partition (EP)                               | Expected Outcome      |
+| --------------------------------- | -------------------------------------------------------- | --------------------- |
+| `getCompanyAverageRating_success` | **EP: Valid** - The company has existing reviews.        | `200 OK`              |
+| `getCompanyAverageRating_notFound`| **EP: Valid** - The company has no reviews.              | `404 NOT FOUND`       |
+| `getCompanyAverageRating_invalidId`| **EP: Invalid** - The company ID in the URL is malformed.| `404 NOT FOUND`       |
+| `getCompanyAverageRating_internalError`| **EP: Invalid** - The service layer throws an exception. | `500 INTERNAL SERVER ERROR` |
+
+---
+
+### 2.2. Service Tests
+
+#### `ReviewServiceTest.java`
+
+-   **Objective**: To test the business logic within the `ReviewService` and its interaction with the `ProductClient`.
+
+| Method                  | Test Case                             | Equivalence Partition (EP)                               | Expected Outcome                  |
+| ----------------------- | ------------------------------------- | -------------------------------------------------------- | --------------------------------- |
+| `addReview`             | `testAddReview_Valid`                 | **EP: Valid** - Valid product ID and review DTO.         | Returns `ReviewDto`.              |
+|                         | `testAddReview_InvalidProductId`      | **EP: Invalid** - The product ID is not valid.           | Throws `IllegalArgumentException`.|
+|                         | `testAddReview_InvalidReview`         | **EP: Invalid** - The review DTO is not valid.           | Throws `IllegalArgumentException`.|
+|                         | `testAddReview_UnexpectedError`       | **EP: Invalid** - The client throws a `RuntimeException`.| Throws `RuntimeException`.        |
+| `getAverageRating`      | `testGetAverageRating_ValidWithRatings`| **EP: Valid** - The product has ratings.                 | Returns `ResponseEntity<Double>`. |
+|                         | `testGetAverageRating_ValidNoRatings` | **EP: Valid** - The product has no ratings.              | Returns `ResponseEntity` with `null` body. |
+|                         | `testGetAverageRating_InvalidProductId`| **EP: Invalid** - The product ID is not valid.           | Throws `IllegalArgumentException`.|
+|                         | `testGetAverageRating_UnexpectedError`| **EP: Invalid** - The client throws a `RuntimeException`.| Throws `RuntimeException`.        |
+
+---
+
+#### `CompanyServiceTest.java`
+
+-   **Objective**: To test the business logic within the `CompanyService` and its interaction with the `CompanyClient`.
+
+| Method                  | Test Case                               | Equivalence Partition (EP)                               | Expected Outcome                  |
+| ----------------------- | --------------------------------------- | -------------------------------------------------------- | --------------------------------- |
+| `getAverageRating`      | `testGetCompanyAverageRating_ValidWithRatings`| **EP: Valid** - The company has ratings.                 | Returns `ResponseEntity<Double>`. |
+|                         | `testGetCompanyAverageRating_ValidWithNoRatings`| **EP: Valid** - The company has no ratings.              | Returns `ResponseEntity` with `null` body. |
+|                         | `testGetCompanyAverageRating_InvalidCompanyId`| **EP: Invalid** - The company ID is not valid.           | Throws `IllegalArgumentException`.|
+|                         | `testGetCompanyAverageRating_UnexpectedError`| **EP: Invalid** - The client throws a `RuntimeException`.| Throws `RuntimeException`.        |
+
+---
+
+### 2.3. Model (DTO) Tests (`ReviewDtoTest.java`, `UserDtoTest.java`)
+
+-   **Objective**: To ensure the integrity of the data transfer objects.
+-   **Equivalence Partition**: The tests for each getter/setter pair cover the **EP of all valid inputs** for that field's data type. For example, `testGetAndSetUsername` covers the partition of all valid `String` inputs.
+
+---
+
+## 3. Integration Test Suite
 
 ### `ReviewDashBoardApplicationTest.java`
 
-This is a foundational test to ensure the application's integrity.
+| Test Case       | Equivalence Partition (EP)                               | Expected Outcome                  |
+| --------------- | -------------------------------------------------------- | --------------------------------- |
+| `contextLoads()`| **EP: Valid Configuration** - All beans and properties are correctly configured. | Application context loads successfully. |
 
-- **`contextLoads()`**
-    - **Equivalence Class**: Successful application startup.
-    - **Verification**: Ensures the Spring Boot application context loads without any configuration errors or missing bean dependencies.
+## 4. How to Run Tests
 
----
+You can run all tests using the following Maven command from the project root:
 
-## 2. Model (DTO) Tests
+```bash
+mvn clean test
+```
 
-These are basic unit tests verifying the data integrity of the Data Transfer Objects (DTOs) by testing their getters and setters.
+## 5. Code Coverage
 
-### `UserDtoTest.java`
+To generate a code coverage report, run:
 
-- **`testGetAndSetId()`**
-    - **Equivalence Class**: Valid `String` input for the user ID.
-    - **Verification**: Ensures the `id` field is set and retrieved correctly.
-- **`testGetAndSetUsername()`**
-    - **Equivalence Class**: Valid `String` input for the username.
-    - **Verification**: Ensures the `username` field is set and retrieved correctly.
+```bash
+mvn clean test jacoco:report
+```
 
-### `ReviewDtoTest.java`
-
-- **`testGetAndSetComment()`**
-    - **Equivalence Class**: Valid `String` input for the comment.
-    - **Verification**: Ensures the `comment` field is set and retrieved correctly.
-- **`testGetAndSetRating()`**
-    - **Equivalence Class**: Valid `double` input for the rating.
-    - **Verification**: Ensures the `rating` field is set and retrieved correctly.
-- **`testGetAndSetUser()`**
-    - **Equivalence Class**: Valid `UserDto` object.
-    - **Verification**: Ensures the `user` object is set and retrieved correctly.
-
----
-
-## 3. Service Layer Tests
-
-These unit tests focus on the business logic within the service layer. They use Mockito to mock the Feign clients, ensuring that the service logic is tested in isolation from external network dependencies.
-
-### `CompanyServiceTest.java`
-
-#### `getAverageRating()` Method
-
-- **`testGetCompanyAverageRating_ValidWithRatings()`**
-    - **Equivalence Class**: Successful client response with a rating.
-    - **Verification**: Ensures the service returns a `ResponseEntity` with the correct rating when the client provides one.
-- **`testGetCompanyAverageRating_ValidWithNoRatings()`**
-    - **Equivalence Class**: Successful client response with no rating data.
-    - **Verification**: Ensures the service returns a `ResponseEntity` with a `null` body when the client indicates no ratings are available.
-- **`testGetCompanyAverageRating_InvalidCompanyId()`**
-    - **Equivalence Class**: Invalid input detected by the client.
-    - **Verification**: Ensures the service propagates the `IllegalArgumentException` thrown by the client.
-- **`testGetCompanyAverageRating_UnexpectedError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the service propagates the `RuntimeException` when the client fails unexpectedly.
-
-### `ReviewServiceTest.java`
-
-#### `addReview()` Method
-
-- **`testAddReview_Valid()`**
-    - **Equivalence Class**: Successful client interaction.
-    - **Verification**: Ensures the service correctly delegates to the client and returns the created `ReviewDto`.
-- **`testAddReview_InvalidProductId()`**
-    - **Equivalence Class**: Invalid product ID detected by the client.
-    - **Verification**: Ensures the service propagates the `IllegalArgumentException` from the client.
-- **`testAddReview_InvalidReview()`**
-    - **Equivalence Class**: Invalid review data detected by the client.
-    - **Verification**: Ensures the service propagates the `IllegalArgumentException` from the client.
-- **`testAddReview_UnexpectedError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the service propagates the `RuntimeException` from the client.
-
-#### `getAverageRating()` Method
-
-- **`testGetAverageRating_ValidWithRatings()`**
-    - **Equivalence Class**: Successful client response with a rating.
-    - **Verification**: Ensures the service returns a `ResponseEntity` with the correct rating.
-- **`testGetAverageRating_ValidNoRatings()`**
-    - **Equivalence Class**: Successful client response with no rating data.
-    - **Verification**: Ensures the service returns a `ResponseEntity` with a `null` body.
-- **`testGetAverageRating_InvalidProductId()`**
-    - **Equivalence Class**: Invalid product ID detected by the client.
-    - **Verification**: Ensures the service propagates the `IllegalArgumentException` from the client.
-- **`testGetAverageRating_UnexpectedError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the service propagates the `RuntimeException` from the client.
-
----
-
-## 4. Controller Layer Tests
-
-### `ReviewClientControllerTest.java`
-
-These unit tests verify the behavior of the `ReviewClientController` in isolation. The service layer is mocked to simulate various scenarios, allowing for focused testing of the controller's request handling, response mapping, and error management logic.
-
-#### `addReview()` Endpoint
-
-- **`testAddReview_Success()`**
-    - **Equivalence Class**: Successful review creation.
-    - **Verification**: Ensures the endpoint returns `201 CREATED` with the review DTO in the body.
-- **`testAddReview_BadRequest()`**
-    - **Equivalence Class**: Invalid input from the client (e.g., bad product ID).
-    - **Verification**: Ensures the endpoint returns `400 BAD REQUEST` with an error message when the service throws an `IllegalArgumentException`.
-- **`testAddReview_InternalError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the endpoint returns `500 INTERNAL SERVER ERROR` with an error message when the service throws a `RuntimeException`.
-
-#### `getProductAverageRating()` Endpoint
-
-- **`testGetProductAverageRating_Success()`**
-    - **Equivalence Class**: Product has an average rating.
-    - **Verification**: Ensures the endpoint returns `200 OK` with the rating value in the body.
-- **`testGetProductAverageRating_NotFound()`**
-    - **Equivalence Class**: Product exists but has no rating data.
-    - **Verification**: Ensures the endpoint returns `404 NOT FOUND` when the service returns a null body.
-- **`testGetProductAverageRating_BadRequest()`**
-    - **Equivalence Class**: Invalid product identifier.
-    - **Verification**: Ensures the endpoint returns `400 BAD REQUEST` when the service throws an `IllegalArgumentException`.
-- **`testGetProductAverageRating_InternalError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the endpoint returns `500 INTERNAL SERVER ERROR` when the service throws a `RuntimeException`.
-
-#### `getCompanyAverageRating()` Endpoint
-
-- **`testGetCompanyAverageRating_Success()`**
-    - **Equivalence Class**: Company has an average rating.
-    - **Verification**: Ensures the endpoint returns `200 OK` with the rating value in the body.
-- **`testGetCompanyAverageRating_NotFound()`**
-    - **Equivalence Class**: Company exists but has no rating data.
-    - **Verification**: Ensures the endpoint returns `404 NOT FOUND` when the service returns a null body.
-- **`testGetCompanyAverageRating_BadRequest()`**
-    - **Equivalence Class**: Invalid company identifier.
-    - **Verification**: Ensures the endpoint returns `400 BAD REQUEST` when the service throws an `IllegalArgumentException`.
-- **`testGetCompanyAverageRating_InternalError()`**
-    - **Equivalence Class**: Unexpected downstream failure.
-    - **Verification**: Ensures the endpoint returns `500 INTERNAL SERVER ERROR` when the service throws a `RuntimeException`.
-
----
-
-## 5. Web Layer Integration Tests
-
-### `ReviewClientControllerIntegrationTest.java`
-
-These tests use Spring's `MockMvc` to perform integration testing of the web layer. They verify that the `ReviewClientController` correctly handles HTTP requests and responses, including JSON serialization and deserialization, by mocking the service layer dependencies.
-
-- **`testAddReview_Success()`**
-    - **Equivalence Class**: Successful end-to-end creation at the web layer.
-    - **Verification**: Asserts that a `POST` request to `/review/product/{productId}` with a valid JSON body returns `201 CREATED` and the correct JSON response.
-
-- **`testGetProductAverageRating_Success()`**
-    - **Equivalence Class**: Successful end-to-end retrieval of a product rating.
-    - **Verification**: Asserts that a `GET` request to `/review/product/{productId}/average-rating` returns `200 OK` and the correct rating value in the response body.
-
-- **`testGetProductAverageRating_NotFound()`**
-    - **Equivalence Class**: End-to-end retrieval for a product with no rating.
-    - **Verification**: Asserts that a `GET` request for a product with no rating data returns `404 NOT FOUND` and the expected error message.
+The report will be available at `target/site/jacoco/index.html`.
