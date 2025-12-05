@@ -24,12 +24,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @SpringBootApplication
 @EnableFeignClients
-public final class ReviewDashBoardApplication {
-  /**
-   * Private constructor to prevent instantiation. This class serves as the Spring Boot application
-   * entry point.
-   */
-  private ReviewDashBoardApplication() {}
+public class ReviewDashBoardApplication {
 
   /**
    * The main method which uses Spring Boot's {@link SpringApplication#run} to launch the
