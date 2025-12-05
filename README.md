@@ -150,6 +150,9 @@ ReviewDashboard/
 
 ## REST API Endpoints
 
+BASE URL: `http://localhost:8080`
+CLOUD URL: `https://review-dashboard-client-321275563168.us-central1.run.app`
+
 Review endpoints are prefixed with `/review`. User creation is under `/auth`.
 
 - `POST /review/product/{productId}`
