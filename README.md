@@ -166,7 +166,7 @@ Important header requirement
   - **Headers (required)**: `X-User-Id: <yourUserId>`
   - **Status Codes**:
     - `201 Created` — Review created; returns `ReviewDto`.
-    - `400 Bad Request` — Missing `X-User-Id` header, invalid rating (<1 or >5), or invalid payload.
+    - `400 Bad Request` — Missing `X-User-Id` header, invalid rating (<0 or >5), or invalid payload.
     - `401 Unauthorized` — Unknown `X-User-Id`.
     - `500 Internal Server Error` — Upstream/service error.
   - **Example**:
@@ -231,6 +231,44 @@ Set external service base URLs in `application.properties`:
 company.client.url=https://.../api/companies
 product.client.url=https://.../api/products
 auth.client.url=https://.../api/auth
+```
+
+## Curl Example Calls
+
+### Submit a Review to the Sentiment Analyzer Service
+This call posts a new review to the upstream `sentiment-analyzer-service`.
+
+```bash
+curl -X POST https://sentiment-analyzer-service-321275563168.us-central1.run.app/api/products/69323f31ca160c3efd870d28/reviews \
+-H "Content-Type: application/json" \
+-H "X-User-Id: testuser1" \
+-d '{"comment": "Absolutely love this product! Best purchase I have ever made. The quality is outstanding and it exceeded all my expectations.", "user": {"username": "adam", "email": "john@example.com"}}'
+```
+**Example Response:**
+```json
+{"id":"69325052b98d2a5e95b9146a","comment":"Absolutely love this product! Best purchase I have ever made. The quality is outstanding and it exceeded all my expectations.","rating":0.3333333333333333,"user":{"id":"69325052b98d2a5e95b91469","username":"adam","email":"john@example.com"}}
+```
+
+### Get Average Rating for a Product
+This call queries our `review-dashboard-client` to get the average rating for a specific product.
+
+```bash
+curl -X GET "https://review-dashboard-client-321275563168.us-central1.run.app/review/product/69323f31ca160c3efd870d28/average-rating" -H "X-User-Id: user123"
+```
+**Example Response:**
+```
+0.08333333333333333
+```
+
+### Get Average Rating for a Company
+This call queries our `review-dashboard-client` to get the average rating for a specific company.
+
+```bash
+curl -X GET "https://review-dashboard-client-321275563168.us-central1.run.app/review/company/6932073840127c64ca92c0a2/average-rating" -H "X-User-Id: user123"
+```
+**Example Response:**
+```
+0.062121212121212126
 ```
 
 ## Testing on GCP
@@ -302,16 +340,14 @@ All source files were validated against the CheckStyle rules defined in the proj
 A CheckStyle report screenshot will be attached as part of the submission to demonstrate that the project passes all required checks.
 
 - Checkstyle Report :
-- ![Checkstyle Report](src/main/resources/checkstyle-coverage.png)
+![Checkstyle Report](src/main/resources/checkstyle-coverage.png)
 
 ## AI Usage
 
-- AI was used to generate initial code snippets, add getters/setters, refactor code, and create comprehensive unit tests.
 - AI assisted in debugging dependency conflicts and providing solutions for build issues.
 - AI helped in generating Javadoc comments for better code documentation.
 
 ## Authors
 - Development Team: [Manav Munjal, Sreenivas Karthik Bandi, Song Li and Sindhu Krishnamurthy]
 
----
 ---
