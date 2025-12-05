@@ -12,6 +12,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
+import feign.FeignException;
+import feign.Request;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -21,39 +25,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
-/**
- * Unit tests for {@link ReviewClientController}, focusing on controller-level behavior using {@link
- * WebMvcTest} with mocked service dependencies.
- *
- * <p>This suite validates HTTP layer correctness, ensuring:
- *
- * <ul>
- *   <li>Correct request handling
- *   <li>Validation of request headers and payloads
- *   <li>Proper HTTP status code mapping
- *   <li>Serialization and deserialization behavior
- * </ul>
- *
- * <h2>Equivalence Partitioning (EP) Covered in This Test Class</h2>
- *
- * <ul>
- *   <li><b>Valid Review Payload</b> — rating ∈ [1–5], comment non-null
- *   <li><b>Invalid Review Payload</b> — rating < 1
- *   <li><b>Existing Review State</b> — when average rating exists
- *   <li><b>No Review State</b> — when average rating is null
- *   <li><b>Missing Required Header</b> — X-User-Id absent
- * </ul>
- *
- * <h2>Boundary Value Analysis (BVA) Covered</h2>
- *
- * <ul>
- *   <li><b>rating = 1</b> → Lower valid boundary (implicitly tested via validReview)
- *   <li><b>rating = 0</b> → Just below lower boundary (explicit invalid test)
- *   <li><b>Null average rating</b> → Boundary of "no data"
- * </ul>
- *
- * <p>Note: tests mock the service layer and validate only controller behavior.
- */
 @WebMvcTest(ReviewClientController.class)
 class ReviewClientControllerTest {
 
@@ -65,16 +36,6 @@ class ReviewClientControllerTest {
 
   private ReviewDto validReview;
 
-  /**
-   * Creates a valid review instance representing the "valid input" partition.
-   *
-   * <p>EP — Valid Input Partition:
-   *
-   * <ul>
-   *   <li>rating ∈ [1–5]
-   *   <li>comment: non-null
-   * </ul>
-   */
   @BeforeEach
   void setup() {
     validReview = new ReviewDto();
@@ -83,189 +44,280 @@ class ReviewClientControllerTest {
   }
 
   // =======================================================================
-  // addReview() SUCCESS
+  // addReview() tests
   // =======================================================================
 
-  /**
-   * Tests successful creation of a review.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>Valid rating</b> ∈ [1–5]
-   *   <li><b>Valid comment</b> → non-null
-   *   <li><b>Valid productId</b> → "123"
-   *   <li><b>Valid X-User-Id header</b>
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>rating = 4 → mid-range valid value
-   * </ul>
-   */
   @Test
   void addReview_success() throws Exception {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(validReview);
 
-    mockMvc
-        .perform(
-            post("/review/product/123")
-                .header("X-User-Id", "U1")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(validReview)))
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(4));
   }
 
-  // =======================================================================
-  // addReview → invalid rating (<1)
-  // =======================================================================
+  @Test
+  void addReview_ratingLowerBoundary_success() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(1);
+    review.setComment("Lower boundary test");
 
-  /**
-   * Tests the controller behavior when rating falls below the valid domain.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>Invalid rating partition</b> → rating < 1
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>rating = 0 → just below lower boundary (invalid)
-   * </ul>
-   */
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.rating").value(1));
+  }
+
+  @Test
+  void addReview_ratingUpperBoundary_success() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(5);
+    review.setComment("Upper boundary test");
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.rating").value(5));
+  }
+
   @Test
   void addReview_invalidRatingLow() throws Exception {
-    ReviewDto invalid = new ReviewDto();
-    invalid.setRating(0);
+    ReviewDto review = new ReviewDto();
+    review.setRating(0);
+    review.setComment("Invalid rating test");
 
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
         .thenThrow(new IllegalArgumentException("Invalid rating"));
 
-    mockMvc
-        .perform(
-            post("/review/product/123")
-                .header("X-User-Id", "U1")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(invalid)))
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void addReview_invalidRatingHigh() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(6);
+    review.setComment("Invalid rating high test");
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(new IllegalArgumentException("Invalid rating"));
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void addReview_nullComment() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(3);
+    review.setComment(null);
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenReturn(review);
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.rating").value(3));
+  }
+
+  @Test
+  void addReview_runtimeException_returns500() throws Exception {
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(new RuntimeException("Service down"));
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(validReview)))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void missingUserIdHeader_returns400() throws Exception {
+    mockMvc.perform(post("/review/product/123")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isBadRequest());
   }
 
   // =======================================================================
-  // getProductAverageRating SUCCESS
+  // getProductAverageRating() tests
   // =======================================================================
 
-  /**
-   * Tests the case where an average rating exists for a product.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>Existing average rating</b> → valid partition
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>average rating = 4.5 → valid midrange
-   * </ul>
-   */
   @Test
   void getProductAverageRating_success() throws Exception {
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenReturn(ResponseEntity.ok(4.5));
 
-    mockMvc
-        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isOk())
         .andExpect(content().string("4.5"));
   }
 
-  // =======================================================================
-  // getProductAverageRating → no reviews (404)
-  // =======================================================================
-
-  /**
-   * Tests the scenario when no reviews exist for a product.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>No-review partition</b> → null response from service
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>average = null → boundary between “exists” & “does not exist”
-   * </ul>
-   */
   @Test
-  void getProductAverageRating_notFound() throws Exception {
+  void getProductAverageRating_nullBody_returns404() throws Exception {
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenReturn(ResponseEntity.ok(null));
 
-    mockMvc
-        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isNotFound());
   }
 
+  @Test
+  void getProductAverageRating_notFound() throws Exception {
+    FeignException.NotFound ex = new FeignException.NotFound(
+        "Not found", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+
+    Mockito.when(reviewService.getAverageRating("123", "U1")).thenThrow(ex);
+
+    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void getProductAverageRating_internalError() throws Exception {
+    Mockito.when(reviewService.getAverageRating("123", "U1"))
+        .thenThrow(new RuntimeException("Service down"));
+
+    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
   // =======================================================================
-  // getCompanyAverageRating SUCCESS
+  // getCompanyAverageRating() tests
   // =======================================================================
 
-  /**
-   * Tests successful retrieval of a company's average rating.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>Existing rating value partition</b> → value present
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>3.7 → valid non-boundary value
-   * </ul>
-   */
   @Test
   void getCompanyAverageRating_success() throws Exception {
     Mockito.when(companyService.getAverageRating("C1", "U1")).thenReturn(ResponseEntity.ok(3.7));
 
-    mockMvc
-        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isOk())
         .andExpect(content().string("3.7"));
   }
 
-  // =======================================================================
-  // Missing X-User-Id header → 400
-  // =======================================================================
-
-  /**
-   * Ensures that the controller rejects requests missing the required header.
-   *
-   * <h3>Equivalence Partitioning (EP)</h3>
-   *
-   * <ul>
-   *   <li><b>Missing-header partition</b> → invalid request
-   * </ul>
-   *
-   * <h3>Boundary Value Analysis (BVA)</h3>
-   *
-   * <ul>
-   *   <li>Header present vs. missing → strict binary boundary
-   * </ul>
-   */
   @Test
-  void missingUserIdHeader_returns400() throws Exception {
-    mockMvc
-        .perform(
-            post("/review/product/123")
-                .contentType("application/json")
-                .content(objectMapper.writeValueAsString(validReview)))
+  void getCompanyAverageRating_nullBody_returns404() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1")).thenReturn(ResponseEntity.ok(null));
+
+    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
+  void getCompanyAverageRating_notFound() throws Exception {
+    FeignException.NotFound ex = new FeignException.NotFound(
+        "Not found", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+
+    Mockito.when(companyService.getAverageRating("C1", "U1")).thenThrow(ex);
+
+    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void getCompanyAverageRating_internalError() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1"))
+        .thenThrow(new RuntimeException("Service down"));
+
+    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void addReview_nullBody_returns400() throws Exception {
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(""))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  void addReview_nullRating_returns400() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(0.0);
+    review.setComment("No rating");
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(new IllegalArgumentException("Invalid rating"));
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void addReview_emptyComment_success() throws Exception {
+    ReviewDto review = new ReviewDto();
+    review.setRating(3);
+    review.setComment("");
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenReturn(review);
+
+    mockMvc.perform(post("/review/product/123")
+            .header("X-User-Id", "U1")
+            .contentType("application/json")
+            .content(objectMapper.writeValueAsString(review)))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.rating").value(3))
+        .andExpect(jsonPath("$.comment").value(""));
+  }
+
+  @Test
+  void getProductAverageRating_missingUserId_returns400() throws Exception {
+    mockMvc.perform(get("/review/product/123/average-rating"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void getCompanyAverageRating_missingUserId_returns400() throws Exception {
+    mockMvc.perform(get("/review/company/C1/average-rating"))
+        .andExpect(status().isBadRequest());
+  }
+
+  // FeignException handling edge case (other than NotFound)
+  @Test
+  void getProductAverageRating_feignOtherException_returns500() throws Exception {
+    FeignException.InternalServerError ex = new FeignException.InternalServerError(
+        "Internal Error", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+
+    Mockito.when(reviewService.getAverageRating("123", "U1")).thenThrow(ex);
+
+    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  @Test
+  void getCompanyAverageRating_feignOtherException_returns500() throws Exception {
+    FeignException.InternalServerError ex = new FeignException.InternalServerError(
+        "Internal Error", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+
+    Mockito.when(companyService.getAverageRating("C1", "U1")).thenThrow(ex);
+
+    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
 }

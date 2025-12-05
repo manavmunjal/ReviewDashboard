@@ -35,37 +35,51 @@ public class AuthController {
   public ResponseEntity<?> createUser(@RequestBody CreateUserRequest request) {
     String userId = request != null ? request.getUserId() : null;
     if (userId == null || userId.trim().isEmpty()) {
-      logger.warn("userId missing or blank in createUser request");
+      if (logger.isWarnEnabled()) {
+        logger.warn("userId missing or blank in createUser request");
+      }
       return ResponseEntity.badRequest().body("Please provide a non-empty userId in the body");
     }
 
     try {
       ResponseEntity<Void> response = authService.createUser(userId);
       if (response.getStatusCode().is2xxSuccessful()) {
-        logger.info("User created successfully: {}", userId);
+        if (logger.isInfoEnabled()) {
+          logger.info("User created successfully: {}", userId);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body("User created");
       }
       // Fallback: unexpected status from upstream
-      logger.error("Unexpected status from auth service: {}", response.getStatusCode());
+      if (logger.isErrorEnabled()) {
+        logger.error("Unexpected status from auth service: {}", response.getStatusCode());
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to create user: unexpected upstream status");
 
     } catch (FeignException e) {
       int status = e.status();
       if (status == 409) {
-        logger.warn("User ID already exists: {}", userId);
+        if (logger.isWarnEnabled()) {
+          logger.warn("User ID already exists: {}", userId);
+        }
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body("This user ID is already taken. Please choose another.");
       }
       if (status == 400) {
-        logger.warn("Invalid userId provided: {}", userId);
+        if (logger.isWarnEnabled()) {
+          logger.warn("Invalid userId provided: {}", userId);
+        }
         return ResponseEntity.badRequest().body("Invalid userId. Please try a different value.");
       }
-      logger.error("Auth service error while creating userId={}", userId, e);
+      if (logger.isErrorEnabled()) {
+        logger.error("Auth service error while creating userId={}", userId, e);
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to create user: " + e.getMessage());
     } catch (Exception e) {
-      logger.error("Unexpected error while creating userId={}", userId, e);
+      if (logger.isErrorEnabled()) {
+        logger.error("Unexpected error while creating userId={}", userId, e);
+      }
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body("Failed to create user: " + e.getMessage());
     }
