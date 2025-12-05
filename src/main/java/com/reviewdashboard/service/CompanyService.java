@@ -28,9 +28,10 @@ public class CompanyService {
    * CompanyClient.
    *
    * @param companyId The unique identifier of the company.
+   * @param userId The user ID for authentication.
    * @return A {@link ResponseEntity} containing the average rating as a {@link Double}.
    */
-  public ResponseEntity<Double> getAverageRating(String companyId) {
-    return companyClient.getAverageRating(companyId);
+  public ResponseEntity<Double> getAverageRating(String companyId, String userId) {
+    return companyClient.getAverageRating(companyId, userId);
   }
 }

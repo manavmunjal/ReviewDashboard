@@ -43,11 +43,13 @@ public class CompanyServiceTest {
   @Test
   public void testGetCompanyAverageRating_ValidWithRatings() {
     String companyId = "123";
+    String userId = "user123";
     Double expectedRating = 4.5;
 
-    when(companyClient.getAverageRating(anyString())).thenReturn(ResponseEntity.ok(expectedRating));
+    when(companyClient.getAverageRating(anyString(), anyString()))
+        .thenReturn(ResponseEntity.ok(expectedRating));
 
-    ResponseEntity<Double> actual = companyService.getAverageRating(companyId);
+    ResponseEntity<Double> actual = companyService.getAverageRating(companyId, userId);
 
     assertEquals(expectedRating, actual.getBody());
   }
@@ -60,10 +62,12 @@ public class CompanyServiceTest {
   @Test
   public void testGetCompanyAverageRating_ValidWithNoRatings() {
     String companyId = "123";
+    String userId = "user123";
 
-    when(companyClient.getAverageRating(anyString())).thenReturn(ResponseEntity.ok(null));
+    when(companyClient.getAverageRating(anyString(), anyString()))
+        .thenReturn(ResponseEntity.ok(null));
 
-    ResponseEntity<Double> actual = companyService.getAverageRating(companyId);
+    ResponseEntity<Double> actual = companyService.getAverageRating(companyId, userId);
 
     assertEquals(null, actual.getBody());
   }
@@ -76,13 +80,14 @@ public class CompanyServiceTest {
   @Test
   public void testGetCompanyAverageRating_InvalidCompanyId() {
     String companyId = "invalid";
+    String userId = "user123";
 
-    when(companyClient.getAverageRating(anyString()))
+    when(companyClient.getAverageRating(anyString(), anyString()))
         .thenThrow(new IllegalArgumentException("Invalid company ID"));
 
     assertThrows(
         IllegalArgumentException.class,
-        () -> companyService.getAverageRating(companyId),
+        () -> companyService.getAverageRating(companyId, userId),
         "Expected IllegalArgumentException for invalid company ID");
   }
 
@@ -94,13 +99,14 @@ public class CompanyServiceTest {
   @Test
   public void testGetCompanyAverageRating_UnexpectedError() {
     String companyId = "123";
+    String userId = "user123";
 
-    when(companyClient.getAverageRating(anyString()))
+    when(companyClient.getAverageRating(anyString(), anyString()))
         .thenThrow(new RuntimeException("Service unavailable"));
 
     assertThrows(
         RuntimeException.class,
-        () -> companyService.getAverageRating(companyId),
+        () -> companyService.getAverageRating(companyId, userId),
         "Expected RuntimeException for unexpected client error");
   }
 }

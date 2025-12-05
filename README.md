@@ -13,7 +13,7 @@ A Spring Boot Client application designed to manage product reviews and integrat
 - **Retrieve Average Ratings**: Endpoints to get average ratings for specific products and companies.
 
 ### 2. **Service Integration**
-- **Feign Clients**: Utilizes Spring Cloud OpenFeign to communicate with external `Review` and `Company` microservices.
+- **Feign Clients**: Utilizes Spring Cloud OpenFeign to communicate with external `Auth`, `Review`, and `Company` microservices.
 - **Service Layer**: Abstracts external service calls and provides a clean interface for the controller.
 
 ### 3. **Spring Boot Application**
@@ -116,14 +116,18 @@ ReviewDashboard/
 │   │   ├── java/com/reviewdashboard/
 │   │   │   ├── ReviewDashBoardApplication.java # Main Spring Boot entry point
 │   │   │   ├── client/                       # Feign clients for external services
+│   │   │   │   ├── AuthClient.java           # Client for Auth Service (create users)
 │   │   │   │   ├── CompanyClient.java        # Client for Company Service
 │   │   │   │   └── ProductClient.java        # Client for Product Service
 │   │   │   ├── controller/                   # REST API controllers
+│   │   │   │   ├── AuthController.java
 │   │   │   │   └── ReviewClientController.java
 │   │   │   ├── model/                        # Data Transfer Objects (DTOs)
+│   │   │   │   ├── CreateUserRequest.java
 │   │   │   │   ├── ReviewDto.java
 │   │   │   │   └── UserDto.java
 │   │   │   └── service/                      # Business logic services
+│   │   │       ├── AuthService.java
 │   │   │       ├── CompanyService.java
 │   │   │       └── ReviewService.java
 │   │   └── resources/
@@ -146,11 +150,12 @@ ReviewDashboard/
 
 ## REST API Endpoints
 
-All endpoints are prefixed with `/review`.
+Review endpoints are prefixed with `/review`. User creation is under `/auth`.
 
 - `POST /review/product/{productId}`
   - **Description**: Submits a new review for a given product.
   - **Request Body**: `ReviewDto` (JSON)
+  - **Headers**: `X-User-Id: <yourUserId>`
   - **Returns**: `ResponseEntity<ReviewDto>` with status `201 CREATED`.
   - **Example**:
   - `POST http://localhost:8080/review/product/product123
@@ -168,13 +173,43 @@ All endpoints are prefixed with `/review`.
 
 - `GET /review/product/{productId}/average-rating`
   - **Description**: Retrieves the average rating for a specific product.
+  - **Headers**: `X-User-Id: <yourUserId>`
   - **Returns**: `ResponseEntity<Double>`
   - **Example**: `GET http://localhost:8080/review/product/product123/average-rating`
 
 - `GET /review/company/{companyId}/average-rating`
   - **Description**: Retrieves the average rating for a specific company.
+  - **Headers**: `X-User-Id: <yourUserId>`
   - **Returns**: `ResponseEntity<Double>`
   - **Example**: `GET http://localhost:8080/review/company/company456/average-rating`
+
+### Auth
+
+- `POST /auth/users`
+  - **Description**: Creates a new user ID in the Auth service.
+  - **Request Body**:
+    ```json
+    { "userId": "user123" }
+    ```
+  - **Returns**: `201 Created` with body `"User created"`.
+  - **Errors (human-readable)**:
+    - `409`: "This user ID is already taken. Please choose another."
+    - `400`: "Invalid userId. Please try a different value."
+    - Other: `500` with a brief message.
+
+### Friendly Errors
+- If `X-User-Id` is missing: `400` with "Please provide a userID in a header".
+- If `X-User-Id` is unknown (upstream 401): `401` with "Your user ID does not exist. Please create a new user."
+
+## Configuration
+
+Set external service base URLs in `application.properties`:
+
+```
+company.client.url=https://.../api/companies
+product.client.url=https://.../api/products
+auth.client.url=https://.../api/auth
+```
 
 ## Testing on GCP
 
@@ -228,6 +263,8 @@ To see the JaCoCo report, open:
 - `ReviewDashBoardApplicationTest`: Verifies application context loading.
 - `ReviewClientControllerTest`: Unit tests for controller logic and error handling.
 - `ReviewClientControllerIntegrationTest`: Integration tests for the web layer, verifying request/response handling.
+- `AuthControllerTest`: Unit tests for user creation and error handling.
+- `AuthControllerIntegrationTest`: Integration tests for `/auth/users`.
 - `CompanyServiceTest`: Tests logic related to company average ratings.
 - `ReviewServiceTest`: Tests logic related to adding reviews and product average ratings.
 - `UserDtoTest`: Verifies `UserDto` getters and setters.

@@ -3,6 +3,7 @@ package com.reviewdashboard.controller;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
+import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,18 +49,26 @@ public class ReviewClientController {
    *
    * @param productId The product ID.
    * @param review The review DTO.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and body.
    */
   @PostMapping("product/{productId}")
   public ResponseEntity<?> addReview(
-      @PathVariable String productId, @RequestBody ReviewDto review) {
+      @PathVariable String productId,
+      @RequestBody ReviewDto review,
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to add review for productId={}", productId);
     }
 
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
+    }
+
     try {
-      ReviewDto createdReview = reviewService.addReview(productId, review);
+      ReviewDto createdReview = reviewService.addReview(productId, review, userId);
 
       if (createdReview.getRating() < 1 || createdReview.getRating() > 5) {
         if (logger.isWarnEnabled()) {
@@ -79,6 +89,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while adding review for productId={}",
+              userId,
+              productId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error adding review for productId={}", productId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to create review: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error adding review for productId={}", productId, e);
@@ -100,17 +126,25 @@ public class ReviewClientController {
    * - EP5: service/DB exception → returns 500
    *
    * @param productId The product ID.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and average rating.
    */
   @GetMapping("product/{productId}/average-rating")
-  public ResponseEntity<?> getProductAverageRating(@PathVariable String productId) {
+  public ResponseEntity<?> getProductAverageRating(
+      @PathVariable String productId,
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for productId={}", productId);
     }
 
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
+    }
+
     try {
-      ResponseEntity<Double> response = reviewService.getAverageRating(productId);
+      ResponseEntity<Double> response = reviewService.getAverageRating(productId, userId);
 
       if (response.getBody() == null) {
         if (logger.isWarnEnabled()) {
@@ -134,6 +168,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while fetching average rating for productId={}",
+              userId,
+              productId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error fetching product rating for productId={}", productId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch product rating: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error fetching product rating for productId={}", productId, e);
@@ -155,17 +205,25 @@ public class ReviewClientController {
    * - EP5: service/DB exception → returns 500
    *
    * @param companyId The company ID.
+   * @param userId The user ID for authentication.
    * @return ResponseEntity with status and average rating.
    */
   @GetMapping("company/{companyId}/average-rating")
-  public ResponseEntity<?> getCompanyAverageRating(@PathVariable String companyId) {
+  public ResponseEntity<?> getCompanyAverageRating(
+      @PathVariable String companyId,
+      @RequestHeader(name = "X-User-Id", required = false) String userId) {
 
     if (logger.isInfoEnabled()) {
       logger.info("Received request to fetch average rating for companyId={}", companyId);
     }
 
+    if (userId == null || userId.trim().isEmpty()) {
+      logger.warn("userId is missing from the request header");
+      return ResponseEntity.badRequest().body("Please provide a userID in a header");
+    }
+
     try {
-      ResponseEntity<Double> response = companyService.getAverageRating(companyId);
+      ResponseEntity<Double> response = companyService.getAverageRating(companyId, userId);
 
       if (response.getBody() == null) {
         if (logger.isWarnEnabled()) {
@@ -189,6 +247,22 @@ public class ReviewClientController {
       }
       return ResponseEntity.badRequest().body(e.getMessage());
 
+    } catch (FeignException e) {
+      if (e.status() == 401) {
+        if (logger.isWarnEnabled()) {
+          logger.warn(
+              "Authentication failed for userId={} while fetching average rating for companyId={}",
+              userId,
+              companyId);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .body("Your user ID does not exist. Please create a new user.");
+      }
+      if (logger.isErrorEnabled()) {
+        logger.error("Feign error fetching company rating for companyId={}", companyId, e);
+      }
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("Failed to fetch company rating: " + e.getMessage());
     } catch (Exception e) {
       if (logger.isErrorEnabled()) {
         logger.error("Error fetching company rating for companyId={}", companyId, e);
