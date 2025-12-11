@@ -51,10 +51,12 @@ class ReviewClientControllerTest {
   void addReview_success() throws Exception {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(validReview);
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(validReview)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(4));
   }
@@ -67,10 +69,12 @@ class ReviewClientControllerTest {
 
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(1));
   }
@@ -83,10 +87,12 @@ class ReviewClientControllerTest {
 
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(5));
   }
@@ -100,10 +106,12 @@ class ReviewClientControllerTest {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
         .thenThrow(new IllegalArgumentException("Invalid rating"));
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isBadRequest());
   }
 
@@ -116,10 +124,12 @@ class ReviewClientControllerTest {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
         .thenThrow(new IllegalArgumentException("Invalid rating"));
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isBadRequest());
   }
 
@@ -129,13 +139,14 @@ class ReviewClientControllerTest {
     review.setRating(3);
     review.setComment(null);
 
-    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
-        .thenReturn(review);
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(3));
   }
@@ -145,18 +156,22 @@ class ReviewClientControllerTest {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
         .thenThrow(new RuntimeException("Service down"));
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(validReview)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isInternalServerError());
   }
 
   @Test
   void missingUserIdHeader_returns400() throws Exception {
-    mockMvc.perform(post("/review/product/123")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(validReview)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isBadRequest());
   }
 
@@ -168,7 +183,8 @@ class ReviewClientControllerTest {
   void getProductAverageRating_success() throws Exception {
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenReturn(ResponseEntity.ok(4.5));
 
-    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isOk())
         .andExpect(content().string("4.5"));
   }
@@ -177,18 +193,25 @@ class ReviewClientControllerTest {
   void getProductAverageRating_nullBody_returns404() throws Exception {
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenReturn(ResponseEntity.ok(null));
 
-    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void getProductAverageRating_notFound() throws Exception {
-    FeignException.NotFound ex = new FeignException.NotFound(
-        "Not found", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+    FeignException.NotFound ex =
+        new FeignException.NotFound(
+            "Not found",
+            Request.create(
+                Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8),
+            null,
+            null);
 
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenThrow(ex);
 
-    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
 
@@ -197,7 +220,8 @@ class ReviewClientControllerTest {
     Mockito.when(reviewService.getAverageRating("123", "U1"))
         .thenThrow(new RuntimeException("Service down"));
 
-    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
 
@@ -209,7 +233,8 @@ class ReviewClientControllerTest {
   void getCompanyAverageRating_success() throws Exception {
     Mockito.when(companyService.getAverageRating("C1", "U1")).thenReturn(ResponseEntity.ok(3.7));
 
-    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isOk())
         .andExpect(content().string("3.7"));
   }
@@ -218,18 +243,25 @@ class ReviewClientControllerTest {
   void getCompanyAverageRating_nullBody_returns404() throws Exception {
     Mockito.when(companyService.getAverageRating("C1", "U1")).thenReturn(ResponseEntity.ok(null));
 
-    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isNotFound());
   }
 
   @Test
   void getCompanyAverageRating_notFound() throws Exception {
-    FeignException.NotFound ex = new FeignException.NotFound(
-        "Not found", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+    FeignException.NotFound ex =
+        new FeignException.NotFound(
+            "Not found",
+            Request.create(
+                Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8),
+            null,
+            null);
 
     Mockito.when(companyService.getAverageRating("C1", "U1")).thenThrow(ex);
 
-    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
 
@@ -238,16 +270,19 @@ class ReviewClientControllerTest {
     Mockito.when(companyService.getAverageRating("C1", "U1"))
         .thenThrow(new RuntimeException("Service down"));
 
-    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
 
   @Test
   void addReview_nullBody_returns400() throws Exception {
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(""))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(""))
         .andExpect(status().isBadRequest());
   }
 
@@ -260,10 +295,12 @@ class ReviewClientControllerTest {
     Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
         .thenThrow(new IllegalArgumentException("Invalid rating"));
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isBadRequest());
   }
 
@@ -273,13 +310,14 @@ class ReviewClientControllerTest {
     review.setRating(3);
     review.setComment("");
 
-    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
-        .thenReturn(review);
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(review);
 
-    mockMvc.perform(post("/review/product/123")
-            .header("X-User-Id", "U1")
-            .contentType("application/json")
-            .content(objectMapper.writeValueAsString(review)))
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(review)))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.rating").value(3))
         .andExpect(jsonPath("$.comment").value(""));
@@ -287,37 +325,46 @@ class ReviewClientControllerTest {
 
   @Test
   void getProductAverageRating_missingUserId_returns400() throws Exception {
-    mockMvc.perform(get("/review/product/123/average-rating"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(get("/review/product/123/average-rating")).andExpect(status().isBadRequest());
   }
 
   @Test
   void getCompanyAverageRating_missingUserId_returns400() throws Exception {
-    mockMvc.perform(get("/review/company/C1/average-rating"))
-        .andExpect(status().isBadRequest());
+    mockMvc.perform(get("/review/company/C1/average-rating")).andExpect(status().isBadRequest());
   }
 
   // FeignException handling edge case (other than NotFound)
   @Test
   void getProductAverageRating_feignOtherException_returns500() throws Exception {
-    FeignException.InternalServerError ex = new FeignException.InternalServerError(
-        "Internal Error", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+    FeignException.InternalServerError ex =
+        new FeignException.InternalServerError(
+            "Internal Error",
+            Request.create(
+                Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8),
+            null,
+            null);
 
     Mockito.when(reviewService.getAverageRating("123", "U1")).thenThrow(ex);
 
-    mockMvc.perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
 
   @Test
   void getCompanyAverageRating_feignOtherException_returns500() throws Exception {
-    FeignException.InternalServerError ex = new FeignException.InternalServerError(
-        "Internal Error", Request.create(Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8), null, null);
+    FeignException.InternalServerError ex =
+        new FeignException.InternalServerError(
+            "Internal Error",
+            Request.create(
+                Request.HttpMethod.GET, "", Collections.emptyMap(), null, StandardCharsets.UTF_8),
+            null,
+            null);
 
     Mockito.when(companyService.getAverageRating("C1", "U1")).thenThrow(ex);
 
-    mockMvc.perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
         .andExpect(status().isInternalServerError());
   }
-
 }

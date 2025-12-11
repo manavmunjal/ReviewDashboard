@@ -11,7 +11,7 @@ public class CreateUserRequest {
    * <p>This constructor is required for JSON deserialization.
    */
   public CreateUserRequest() {
-    //no-ops
+    // no-ops
   }
 
   /** Convenience constructor. */
