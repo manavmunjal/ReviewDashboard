@@ -99,7 +99,7 @@ class ReviewClientControllerLoggerTest {
                 .header("X-User-Id", "U1")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(review)))
-        .andExpect(status().isBadRequest());
+        .andExpect(status().isCreated());
 
     assertNoLogsAtLevel(Level.WARN);
   }
