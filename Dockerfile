@@ -10,6 +10,7 @@ RUN mvn dependency:go-offline
 
 # Copy the rest of the application code
 COPY src ./src
+COPY checkstyle.xml .
 
 # Build the application
 RUN mvn clean install

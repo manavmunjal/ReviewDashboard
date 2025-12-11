@@ -25,13 +25,14 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 public class ReviewDashBoardApplication {
+
   /**
    * The main method which uses Spring Boot's {@link SpringApplication#run} to launch the
    * application.
    *
    * @param args Command line arguments passed to the application.
    */
-  public static void main(String[] args) {
+  public static void main(final String[] args) {
     SpringApplication.run(ReviewDashBoardApplication.class, args);
   }
 }

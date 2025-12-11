@@ -21,7 +21,7 @@ public class AuthService {
    * @param userId The desired user ID.
    * @return The raw response from the auth service.
    */
-  public ResponseEntity<Void> createUser(String userId) {
+  public ResponseEntity<Void> createUser(final String userId) {
     return authClient.createUser(new CreateUserRequest(userId));
   }
 }
