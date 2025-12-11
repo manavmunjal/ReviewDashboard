@@ -86,6 +86,33 @@ public class AuthControllerTest {
     assertEquals("Failed to create user: Upstream down", response.getBody());
   }
 
+  @Test
+  public void testCreateUser_NullRequest() {
+    ResponseEntity<?> response = controller.createUser(null);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertEquals("Please provide a non-empty userId in the body", response.getBody());
+  }
+
+  @Test
+  public void testCreateUser_UnexpectedUpstreamStatus() {
+    when(authService.createUser(anyString())).thenReturn(ResponseEntity.status(500).build());
+
+    ResponseEntity<?> response = controller.createUser(new CreateUserRequest("user123"));
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    assertEquals("Failed to create user: unexpected upstream status", response.getBody());
+  }
+
+  @Test
+  public void testCreateUser_OtherFeignException() {
+    when(authService.createUser(anyString()))
+        .thenThrow(buildFeignException(503, "Service Unavailable"));
+
+    ResponseEntity<?> response = controller.createUser(new CreateUserRequest("user123"));
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+  }
+
   private FeignException buildFeignException(int status, String message) {
     Request request =
         Request.create(

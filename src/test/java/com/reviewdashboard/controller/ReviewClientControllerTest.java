@@ -12,6 +12,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.reviewdashboard.model.ReviewDto;
 import com.reviewdashboard.service.CompanyService;
 import com.reviewdashboard.service.ReviewService;
+import feign.FeignException;
+import feign.Request;
+import feign.RequestTemplate;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -267,5 +272,265 @@ class ReviewClientControllerTest {
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(validReview)))
         .andExpect(status().isBadRequest());
+  }
+
+  // =======================================================================
+  // addReview → FeignException 401 (Unauthorized)
+  // =======================================================================
+
+  @Test
+  void addReview_unauthorized() throws Exception {
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(buildFeignException(401, "Unauthorized"));
+
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().string("Your user ID does not exist. Please create a new user."));
+  }
+
+  // =======================================================================
+  // addReview → FeignException non-401 (other errors)
+  // =======================================================================
+
+  @Test
+  void addReview_feignExceptionOtherStatus() throws Exception {
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(buildFeignException(503, "Service Unavailable"));
+
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // addReview → Generic Exception
+  // =======================================================================
+
+  @Test
+  void addReview_genericException() throws Exception {
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1")))
+        .thenThrow(new RuntimeException("Unexpected error"));
+
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(validReview)))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // addReview → rating > 5 (invalid high)
+  // =======================================================================
+
+  @Test
+  void addReview_invalidRatingHigh() throws Exception {
+    ReviewDto invalidHigh = new ReviewDto();
+    invalidHigh.setRating(6);
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(invalidHigh);
+
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(invalidHigh)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid rating"));
+  }
+
+  // =======================================================================
+  // addReview → rating < 0 (invalid negative)
+  // =======================================================================
+
+  @Test
+  void addReview_invalidRatingNegative() throws Exception {
+    ReviewDto invalidNeg = new ReviewDto();
+    invalidNeg.setRating(-1);
+
+    Mockito.when(reviewService.addReview(eq("123"), any(), eq("U1"))).thenReturn(invalidNeg);
+
+    mockMvc
+        .perform(
+            post("/review/product/123")
+                .header("X-User-Id", "U1")
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(invalidNeg)))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid rating"));
+  }
+
+  // =======================================================================
+  // getProductAverageRating → IllegalArgumentException
+  // =======================================================================
+
+  @Test
+  void getProductAverageRating_illegalArgument() throws Exception {
+    Mockito.when(reviewService.getAverageRating("123", "U1"))
+        .thenThrow(new IllegalArgumentException("Invalid productId"));
+
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid productId"));
+  }
+
+  // =======================================================================
+  // getProductAverageRating → FeignException 401
+  // =======================================================================
+
+  @Test
+  void getProductAverageRating_unauthorized() throws Exception {
+    Mockito.when(reviewService.getAverageRating("123", "U1"))
+        .thenThrow(buildFeignException(401, "Unauthorized"));
+
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().string("Your user ID does not exist. Please create a new user."));
+  }
+
+  // =======================================================================
+  // getProductAverageRating → FeignException non-401
+  // =======================================================================
+
+  @Test
+  void getProductAverageRating_feignExceptionOtherStatus() throws Exception {
+    Mockito.when(reviewService.getAverageRating("123", "U1"))
+        .thenThrow(buildFeignException(500, "Internal Server Error"));
+
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // getProductAverageRating → Generic Exception
+  // =======================================================================
+
+  @Test
+  void getProductAverageRating_genericException() throws Exception {
+    Mockito.when(reviewService.getAverageRating("123", "U1"))
+        .thenThrow(new RuntimeException("Unexpected error"));
+
+    mockMvc
+        .perform(get("/review/product/123/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → not found (null body)
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_notFound() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1")).thenReturn(ResponseEntity.ok(null));
+
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isNotFound());
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → missing header
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_missingHeader() throws Exception {
+    mockMvc.perform(get("/review/company/C1/average-rating")).andExpect(status().isBadRequest());
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → IllegalArgumentException
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_illegalArgument() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1"))
+        .thenThrow(new IllegalArgumentException("Invalid companyId"));
+
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isBadRequest())
+        .andExpect(content().string("Invalid companyId"));
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → FeignException 401
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_unauthorized() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1"))
+        .thenThrow(buildFeignException(401, "Unauthorized"));
+
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isUnauthorized())
+        .andExpect(content().string("Your user ID does not exist. Please create a new user."));
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → FeignException non-401
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_feignExceptionOtherStatus() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1"))
+        .thenThrow(buildFeignException(502, "Bad Gateway"));
+
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // getCompanyAverageRating → Generic Exception
+  // =======================================================================
+
+  @Test
+  void getCompanyAverageRating_genericException() throws Exception {
+    Mockito.when(companyService.getAverageRating("C1", "U1"))
+        .thenThrow(new RuntimeException("Unexpected error"));
+
+    mockMvc
+        .perform(get("/review/company/C1/average-rating").header("X-User-Id", "U1"))
+        .andExpect(status().isInternalServerError());
+  }
+
+  // =======================================================================
+  // getProductAverageRating → missing header
+  // =======================================================================
+
+  @Test
+  void getProductAverageRating_missingHeader() throws Exception {
+    mockMvc.perform(get("/review/product/123/average-rating")).andExpect(status().isBadRequest());
+  }
+
+  // =======================================================================
+  // Helper method to build FeignException
+  // =======================================================================
+
+  private FeignException buildFeignException(int status, String message) {
+    Request request =
+        Request.create(
+            Request.HttpMethod.GET,
+            "/test",
+            Collections.emptyMap(),
+            message != null ? message.getBytes(StandardCharsets.UTF_8) : null,
+            StandardCharsets.UTF_8,
+            new RequestTemplate());
+    return new FeignException.FeignClientException(status, message, request, null, null);
   }
 }
