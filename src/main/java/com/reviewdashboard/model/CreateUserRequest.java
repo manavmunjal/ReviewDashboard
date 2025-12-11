@@ -5,8 +5,14 @@ public class CreateUserRequest {
   /** The requested unique user identifier. */
   private String userId;
 
-  /** Default constructor. */
-  public CreateUserRequest() {}
+  /**
+   * Default constructor.
+   *
+   * <p>This constructor is required for JSON deserialization.
+   */
+  public CreateUserRequest() {
+    // no-ops
+  }
 
   /** Convenience constructor. */
   public CreateUserRequest(String userId) {

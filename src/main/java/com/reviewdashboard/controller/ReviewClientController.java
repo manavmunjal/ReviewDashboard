@@ -70,13 +70,6 @@ public class ReviewClientController {
     try {
       ReviewDto createdReview = reviewService.addReview(productId, review, userId);
 
-      if (createdReview.getRating() < 0.0 || createdReview.getRating() > 5.0) {
-        if (logger.isWarnEnabled()) {
-          logger.warn("Invalid rating for productId={}", productId);
-        }
-        return ResponseEntity.badRequest().body("Invalid rating");
-      }
-
       if (logger.isInfoEnabled()) {
         logger.info("Successfully added review for productId={}", productId);
       }
